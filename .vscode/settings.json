@@ -1,0 +1,27 @@
+{
+    "cmake.options.statusBarVisibility": "hidden",
+    "cmake.options.advanced": {
+        // "build": {
+        //     "statusBarVisibility": "hidden"
+        // },
+        "launch": {
+            "statusBarVisibility": "hidden"
+        },
+        "debug": {
+            "statusBarVisibility": "hidden"
+        }
+    },
+    "cmake.generator": "Ninja",
+    "cortex-debug.variableUseNaturalFormat": false,
+    "clangd.arguments": [
+        "-j=12",
+        "--background-index",
+        "--query-driver=C:/APP/xpack-dev-tools/riscv-none-elf-gcc/bin/riscv-wch-elf-*", //设置交叉编译器路径
+        "--compile-commands-dir=${workspaceFolder}/build",
+        "--all-scopes-completion",
+        "--completion-style=detailed",
+        "--header-insertion=never",
+        "--clang-tidy",
+        "--log=verbose"
+    ],
+}

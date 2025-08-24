@@ -1,0 +1,75 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/${workspaceFolderBasename}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
+            "gdbPath": "C:/APP/xpack-dev-tools/WchEmbeddedGCC12/bin/riscv-wch-elf-gdb",
+            "configFiles": [
+                "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+            ],
+            // "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
+            "liveWatch": {
+                "enabled": false,
+                "samplesPerSecond": 4
+            },
+            "preLaunchTask": "Build",
+            "rttConfig": {
+                "enabled": false,
+                "searchId": "SEGGER RTT",
+                "address": "536871312",
+                "searchSize": 2000,
+                "rtt_start_retry": 1000,
+                "decoders": [
+                    {
+                        "label": "",
+                        "port": 0,
+                        "type": "console"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/Debug/${workspaceFolderBasename}.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "openocd",
+            "serverpath": "${env:WCH_OPENOCD_PATH}/bin/openocd",
+            "gdbPath": "${env:WCH_GCC_PATH}/bin/riscv-wch-elf-gdb",
+            "configFiles": [
+                "${env:WCH_OPENOCD_PATH}/bin/wch-riscv.cfg",
+            ],
+            "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
+            "liveWatch": {
+                "enabled": false,
+                "samplesPerSecond": 4
+            },
+            "rttConfig": {
+                "enabled": false,
+                "searchId": "SEGGER RTT",
+                "address": "536870912",
+                "searchSize": 2000,
+                "rtt_start_retry": 1000,
+                "decoders": [
+                    {
+                        "label": "",
+                        "port": 0,
+                        "type": "console"
+                    }
+                ]
+            }
+        },
+    ]
+}
