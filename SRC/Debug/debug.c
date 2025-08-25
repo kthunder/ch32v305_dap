@@ -15,8 +15,8 @@
 static uint8_t  p_us = 0;
 static uint16_t p_ms = 0;
 
-#define DEBUG_DATA0_ADDRESS  ((volatile uint32_t*)0xE0000380)
-#define DEBUG_DATA1_ADDRESS  ((volatile uint32_t*)0xE0000384)
+#define DEBUG_DATA0_ADDRESS ((volatile uint32_t *)0xE0000380)
+#define DEBUG_DATA1_ADDRESS ((volatile uint32_t *)0xE0000384)
 
 /*********************************************************************
  * @fn      Delay_Init
@@ -28,8 +28,8 @@ static uint16_t p_ms = 0;
 void Delay_Init(void)
 {
     SysTick->CTLR |= (1 << 0);
-    p_us = SystemCoreClock / 12000000;
-    p_ms = (uint16_t)p_us * 1000;
+    p_us = (SystemCoreClock / 8) / 1000000;
+    p_ms = p_us * 1000;
 }
 
 /*********************************************************************
@@ -85,9 +85,40 @@ void Delay_Ms(uint32_t n)
     //     ;
     // SysTick->CTLR &= ~(1 << 0);
 }
+// 手动64位除法 (仅当除数是32位时)
+uint32_t div64_32(uint64_t dividend, uint32_t divisor)
+{
+    uint32_t high = (uint32_t)(dividend >> 32);
+    uint32_t low = (uint32_t)dividend;
 
-uint32_t sys_time_ms() { return SysTick->CNT / p_ms; };
-uint32_t sys_time_us() { return SysTick->CNT / p_us; };
+    if (high == 0) {
+        return low / divisor; // 简单32位除法
+    }
+
+    // 长除法
+    uint32_t result = 0;
+    for (int i = 31; i >= 0; i--) {
+        result <<= 1;
+        high = (high << 1) | ((low >> 31) & 1);
+        low <<= 1;
+
+        if (high >= divisor) {
+            high -= divisor;
+            result |= 1;
+        }
+    }
+    return result;
+}
+
+uint32_t sys_time_ms()
+{
+    return div64_32(SysTick->CNT, p_ms);
+};
+
+uint32_t sys_time_us()
+{
+    return div64_32(SysTick->CNT, p_us);
+};
 
 /*********************************************************************
  * @fn      USART_Printf_Init
@@ -100,10 +131,10 @@ uint32_t sys_time_us() { return SysTick->CNT / p_us; };
  */
 void USART_Printf_Init(uint32_t baudrate)
 {
-    GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
 
-#if(DEBUGU == DEBUG_UART1)
+#if (DEBUGU == DEBUG_UART1)
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA, ENABLE);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
@@ -111,7 +142,7 @@ void USART_Printf_Init(uint32_t baudrate)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-#elif(DEBUGU == DEBUG_UART2)
+#elif (DEBUGU == DEBUG_UART2)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 
@@ -120,7 +151,7 @@ void USART_Printf_Init(uint32_t baudrate)
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-#elif(DEBUGU == DEBUG_UART3)
+#elif (DEBUGU == DEBUG_UART3)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 
@@ -138,15 +169,15 @@ void USART_Printf_Init(uint32_t baudrate)
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode = USART_Mode_Tx;
 
-#if(DEBUGU == DEBUG_UART1)
+#if (DEBUGU == DEBUG_UART1)
     USART_Init(USART1, &USART_InitStructure);
     USART_Cmd(USART1, ENABLE);
 
-#elif(DEBUGU == DEBUG_UART2)
+#elif (DEBUGU == DEBUG_UART2)
     USART_Init(USART2, &USART_InitStructure);
     USART_Cmd(USART2, ENABLE);
 
-#elif(DEBUGU == DEBUG_UART3)
+#elif (DEBUGU == DEBUG_UART3)
     USART_Init(USART3, &USART_InitStructure);
     USART_Cmd(USART3, ENABLE);
 
@@ -186,50 +217,44 @@ __attribute__((used)) int _write(int fd, char *buf, int size)
 #if (SDI_PRINT == SDI_PR_OPEN)
     int writeSize = size;
 
-    do
-    {
-
+    do {
         /**
          * data0  data1 8 bytes
          * data0 The lowest byte storage length, the maximum is 7
          *
          */
 
-        while( (*(DEBUG_DATA0_ADDRESS) != 0u))
-        {
-
+        while ((*(DEBUG_DATA0_ADDRESS) != 0u)) {
         }
 
-        if(writeSize>7)
-        {
-            *(DEBUG_DATA1_ADDRESS) = (*(buf+i+3)) | (*(buf+i+4)<<8) | (*(buf+i+5)<<16) | (*(buf+i+6)<<24);
-            *(DEBUG_DATA0_ADDRESS) = (7u) | (*(buf+i)<<8) | (*(buf+i+1)<<16) | (*(buf+i+2)<<24);
+        if (writeSize > 7) {
+            *(DEBUG_DATA1_ADDRESS) = (*(buf + i + 3)) | (*(buf + i + 4) << 8) | (*(buf + i + 5) << 16) | (*(buf + i + 6) << 24);
+            *(DEBUG_DATA0_ADDRESS) = (7u) | (*(buf + i) << 8) | (*(buf + i + 1) << 16) | (*(buf + i + 2) << 24);
 
             i += 7;
             writeSize -= 7;
-        }
-        else
-        {
-            *(DEBUG_DATA1_ADDRESS) = (*(buf+i+3)) | (*(buf+i+4)<<8) | (*(buf+i+5)<<16) | (*(buf+i+6)<<24);
-            *(DEBUG_DATA0_ADDRESS) = (writeSize) | (*(buf+i)<<8) | (*(buf+i+1)<<16) | (*(buf+i+2)<<24);
+        } else {
+            *(DEBUG_DATA1_ADDRESS) = (*(buf + i + 3)) | (*(buf + i + 4) << 8) | (*(buf + i + 5) << 16) | (*(buf + i + 6) << 24);
+            *(DEBUG_DATA0_ADDRESS) = (writeSize) | (*(buf + i) << 8) | (*(buf + i + 1) << 16) | (*(buf + i + 2) << 24);
 
             writeSize = 0;
         }
 
     } while (writeSize);
 
-
 #else
-    for(i = 0; i < size; i++)
-    {
-#if(DEBUGU == DEBUG_UART1)
-        while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);
+    for (i = 0; i < size; i++) {
+#if (DEBUGU == DEBUG_UART1)
+        while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
+            ;
         USART_SendData(USART1, *buf++);
-#elif(DEBUGU == DEBUG_UART2)
-        while(USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
+#elif (DEBUGU == DEBUG_UART2)
+        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET)
+            ;
         USART_SendData(USART2, *buf++);
-#elif(DEBUGU == DEBUG_UART3)
-        while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET);
+#elif (DEBUGU == DEBUG_UART3)
+        while (USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
+            ;
         USART_SendData(USART3, *buf++);
 #endif
     }
@@ -251,11 +276,8 @@ __attribute__((used)) void *_sbrk(ptrdiff_t incr)
     static char *curbrk = _end;
 
     if ((curbrk + incr < _end) || (curbrk + incr > _heap_end))
-    return NULL - 1;
+        return NULL - 1;
 
     curbrk += incr;
     return curbrk - incr;
 }
-
-
-

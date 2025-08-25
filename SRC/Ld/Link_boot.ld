@@ -12,7 +12,6 @@ MEMORY
 */
 
 	FLASH (rx)  : ORIGIN = 0x00000000, LENGTH = 8K
-	FLASH1 (rx) : ORIGIN = 0x0001E000, LENGTH = 8K
 	RAM (xrw)   : ORIGIN = 0x20000000, LENGTH = 32K
 
     
@@ -51,16 +50,11 @@ SECTIONS
 	.text :
 	{
 		. = ALIGN(4);
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .text)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .text.*)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .rodata)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .rodata*)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .gnu.linkonce.t.*)
-		/* *(.text)
+		*(.text)
 		*(.text.*)
 		*(.rodata)
 		*(.rodata*)
-		*(.gnu.linkonce.t.*) */
+		*(.gnu.linkonce.t.*)
 		. = ALIGN(4);
 	} >FLASH AT>FLASH 
 
@@ -158,17 +152,6 @@ SECTIONS
     	. = ALIGN(4);
 		PROVIDE( _edata = .);
 	} >RAM AT>FLASH
-
-	.text1 :
-	{
-		. = ALIGN(4);
-		*(.text)
-		*(.text.*)
-		*(.rodata)
-		*(.rodata*)
-		*(.gnu.linkonce.t.*)
-		. = ALIGN(4);
-	} >FLASH1 AT>FLASH1 
 
 	.bss  (NOLOAD) :
 	{

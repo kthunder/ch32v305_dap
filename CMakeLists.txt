@@ -94,6 +94,7 @@ add_compile_options(
         -Wunused
         -Wuninitialized
         -Os
+        -flto
 )
 
 add_link_options(
@@ -106,7 +107,7 @@ add_link_options(
         --specs=nano.specs --specs=nosys.specs
 )
 
-
+############### APP ###############
 add_executable(${PROJECT_NAME}.elf ${APP_SOURCES})
 target_compile_definitions(${PROJECT_NAME}.elf PRIVATE PROJ=0)
 target_link_options(${PROJECT_NAME}.elf PRIVATE
@@ -125,29 +126,7 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
         COMMAND ${SIZE} --format=berkeley $<TARGET_FILE:${PROJECT_NAME}.elf>
 )
 
-
-
-
-add_executable(${PROJECT_NAME}_app.elf ${APP_SOURCES})
-target_compile_definitions(${PROJECT_NAME}_app.elf PRIVATE PROJ=0)
-target_link_options(${PROJECT_NAME}_app.elf PRIVATE
-        -T ${APP_LINKER_SCRIPT}
-        -Wl,-Map,${PROJECT_BINARY_DIR}/${PROJECT_NAME}_app.map
-)
-
-# APP目标的后处理
-set(APP_HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_app.hex)
-set(APP_BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_app.bin)
-set(APP_LST_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_app.lst)
-
-add_custom_command(TARGET ${PROJECT_NAME}_app.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}_app.elf> ${APP_HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}_app.elf> ${APP_BIN_FILE}
-        COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble $<TARGET_FILE:${PROJECT_NAME}_app.elf> > ${APP_LST_FILE}
-        COMMAND ${SIZE} --format=berkeley $<TARGET_FILE:${PROJECT_NAME}_app.elf>
-)
-
-
+############### BOOT ###############
 add_executable(${PROJECT_NAME}_boot.elf ${BOOT_SOURCES})
 target_compile_definitions(${PROJECT_NAME}_boot.elf PRIVATE PROJ=1)
 target_link_options(${PROJECT_NAME}_boot.elf PRIVATE
@@ -155,7 +134,6 @@ target_link_options(${PROJECT_NAME}_boot.elf PRIVATE
         -Wl,-Map,${PROJECT_BINARY_DIR}/${PROJECT_NAME}_boot.map
 )
 
-# BOOT目标的后处理
 set(BOOT_HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_boot.hex)
 set(BOOT_BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_boot.bin)
 set(BOOT_LST_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_boot.lst)

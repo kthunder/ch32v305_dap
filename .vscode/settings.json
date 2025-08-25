@@ -12,7 +12,6 @@
         }
     },
     "cmake.generator": "Ninja",
-    "cortex-debug.variableUseNaturalFormat": false,
     "clangd.arguments": [
         "-j=12",
         "--background-index",

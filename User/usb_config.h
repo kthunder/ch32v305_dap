@@ -31,7 +31,7 @@
 #define CONFIG_USB_HS
  
 /* attribute data into no cache ram */
-#define USB_NOCACHE_RAM_SECTION __attribute__((section(".noncacheable")))
+#define USB_NOCACHE_RAM_SECTION __attribute__((section(".bss.noncacheable")))
 
 /* ================= USB Device Stack Configuration ================ */
 

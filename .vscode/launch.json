@@ -13,7 +13,7 @@
             "runToEntryPoint": "main",
             "servertype": "openocd",
             "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
-            "gdbPath": "C:/APP/xpack-dev-tools/WchEmbeddedGCC12/bin/riscv-wch-elf-gdb",
+            "gdbPath": "riscv-wch-elf-gdb",
             "configFiles": [
                 "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
             ],
@@ -47,7 +47,7 @@
             "runToEntryPoint": "main",
             "servertype": "openocd",
             "serverpath": "${env:WCH_OPENOCD_PATH}/bin/openocd",
-            "gdbPath": "${env:WCH_GCC_PATH}/bin/riscv-wch-elf-gdb",
+            "gdbPath": "riscv-wch-elf-gdb",
             "configFiles": [
                 "${env:WCH_OPENOCD_PATH}/bin/wch-riscv.cfg",
             ],
