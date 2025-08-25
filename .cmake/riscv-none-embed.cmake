@@ -39,10 +39,6 @@ else ()
     add_compile_options(-O0 -g -gdwarf-2)
 endif ()
 
-add_compile_definitions(
-    PROJ=0
-    )
-
 # MCU specific flags
 add_compile_options(
     -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore
@@ -59,13 +55,35 @@ add_compile_options(
 
 add_link_options(
     -march=rv32imacxw -mabi=ilp32
-    -flto
     -nostartfiles
     -Xlinker
     --gc-sections
     -lm
     -Wl,--print-memory-usage
     --specs=nano.specs --specs=nosys.specs
-    -T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections
+    -flto
 )
+
+# 读取 main.c 文件内容
+file(READ "User/main.c" MAIN_C_CONTENT)
+
+# 提取 PROJ 宏定义
+string(REGEX MATCH "#define PROJ ([A-Z]+)" PROJ_MATCH "${MAIN_C_CONTENT}")
+if(PROJ_MATCH)
+    set(PROJ_VALUE ${CMAKE_MATCH_1})
+else()
+    # 默认值
+    set(PROJ_VALUE "APP")
+endif()
+
+# 根据 PROJ 值选择链接脚本
+if(PROJ_VALUE STREQUAL "APP")
+    add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)
+    add_link_options(-Wl,--defsym=__flash_origin=0x00002000)
+    add_link_options(-Wl,--defsym=__flash_length=120K)
+elseif(PROJ_VALUE STREQUAL "BOOT")
+    add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)
+    add_link_options(-Wl,--defsym=__flash_origin=0x00000000)
+    add_link_options(-Wl,--defsym=__flash_length=8K)
+endif()
