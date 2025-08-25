@@ -6,7 +6,7 @@
             "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "toolchainFile": "${sourceDir}/cmake/riscv-none-embed.cmake",
+            "toolchainFile": "${sourceDir}/.cmake/riscv-none-embed.cmake",
             "cacheVariables": {}
         },
         {

@@ -26,11 +26,10 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/DAPHost
 )
 file(GLOB_RECURSE SOURCES
-    ${CMAKE_SOURCE_DIR}/SRC/Core/core_riscv.c
-    ${CMAKE_SOURCE_DIR}/SRC/Debug/debug.c
-    ${CMAKE_SOURCE_DIR}/SRC/Peripheral/src/*.c
+    ${CMAKE_SOURCE_DIR}/SRC/*.c
     ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
+    ${CMAKE_SOURCE_DIR}/CherryUSB/class/cdc/usbd_msc.c
     ${CMAKE_SOURCE_DIR}/CherryUSB/class/cdc/usbd_cdc.c
     ${CMAKE_SOURCE_DIR}/CherryUSB/core/usbd_core.c
     ${CMAKE_SOURCE_DIR}/CherryUSB/port/ch32/usb_dc_usbhs.c
@@ -39,6 +38,14 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Source/*.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/dap_main.c
 )
+        # "SRC/Core/core_riscv.c"
+        # "SRC/Debug/debug.c"
+        # "SRC/Peripheral/src/*.c"
+        # "SRC/Startup/startup_ch32v30x_D8C.S"
+        # "User/*.c"
+        # "CherryUSB/class/msc/usbd_msc.c"
+        # "CherryUSB/core/usbd_core.c"
+        # "CherryUSB/port/ch32/usb_dc_usbhs.c"
 target_sources(app INTERFACE
     ${SOURCES}
 )
