@@ -15,7 +15,7 @@
     "clangd.arguments": [
         "-j=12",
         "--background-index",
-        "--query-driver=C:/APP/xpack-dev-tools/riscv-none-elf-gcc/bin/riscv-wch-elf-*", //设置交叉编译器路径
+        "--query-driver=riscv-wch-elf-*", //设置交叉编译器路径
         "--compile-commands-dir=${workspaceFolder}/build",
         "--all-scopes-completion",
         "--completion-style=detailed",

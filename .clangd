@@ -1,7 +1,8 @@
 CompileFlags:
   Add:
     - --target=riscv32-unknown-elf
-    - -IC:\APP\xpack-dev-tools\WchEmbeddedGCC12\riscv-wch-elf\include
+    - -IC:/APP/xpack-dev-tools/WchEmbeddedGCC12/riscv-wch-elf/include
+    - -I/Users/konglei/git/RISC-V-Embedded-GCC12/riscv-wch-elf/include
   Remove: 
   - -march=rv32imacxw
   - -mabi=ilp32
