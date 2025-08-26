@@ -8,11 +8,11 @@
 
 /* ================ USB common Configuration ================ */
 
-// #define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
-#define CONFIG_USB_PRINTF(...) 
+#define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
+// #define CONFIG_USB_PRINTF(...) 
 
 #ifndef CONFIG_USB_DBG_LEVEL
-#define CONFIG_USB_DBG_LEVEL USB_DBG_INFO
+#define CONFIG_USB_DBG_LEVEL USB_DBG_LOG
 #endif
 
 /* Enable print with color */
@@ -22,8 +22,6 @@
 #ifndef CONFIG_USB_ALIGN_SIZE
 #define CONFIG_USB_ALIGN_SIZE 4
 #endif
-
-#define CONFIG_USB_HS
  
 /* attribute data into no cache ram */
 #define USB_NOCACHE_RAM_SECTION __attribute__((section(".bss.noncacheable")))
@@ -32,11 +30,11 @@
 
 /* Ep0 in and out transfer buffer */
 #ifndef CONFIG_USBDEV_REQUEST_BUFFER_LEN
-#define CONFIG_USBDEV_REQUEST_BUFFER_LEN 64
+#define CONFIG_USBDEV_REQUEST_BUFFER_LEN 512
 #endif
 
 /* Setup packet log for debug */
-// #define CONFIG_USBDEV_SETUP_LOG_PRINT
+#define CONFIG_USBDEV_SETUP_LOG_PRINT
 
 /* Send ep0 in data from user buffer instead of copying into ep0 reqdata
  * Please note that user buffer must be aligned with CONFIG_USB_ALIGN_SIZE
@@ -44,7 +42,7 @@
 // #define CONFIG_USBDEV_EP0_INDATA_NO_COPY
 
 /* Check if the input descriptor is correct */
-// #define CONFIG_USBDEV_DESC_CHECK
+#define CONFIG_USBDEV_DESC_CHECK
 
 /* Enable test mode */
 // #define CONFIG_USBDEV_TEST_MODE
@@ -212,7 +210,7 @@
 #endif
 
 /* When your chip hardware supports high-speed and wants to initialize it in high-speed mode, the relevant IP will configure the internal or external high-speed PHY according to CONFIG_USB_HS. */
-// #define CONFIG_USB_HS
+#define CONFIG_USB_HS
 
 /* ---------------- FSDEV Configuration ---------------- */
 //#define CONFIG_USBDEV_FSDEV_PMA_ACCESS 2 // maybe 1 or 2, many chips may have a difference

@@ -114,7 +114,7 @@ void check_iap_status(void)
     if (io_status && (*(uint8_t *)APP_RUN_ADDR == 0x6F)) {
         NVIC_SetPendingIRQ(Software_IRQn);
     } else {
-        // msc_ram_init(0, USBHS_BASE);
+        // msc_ram_init(0, 0);
         while (1) {
             static uint32_t counter = 0;
             key_scan();
@@ -140,7 +140,7 @@ void SW_Handler(void)
 #define BOOT 1
 
 #ifndef PROJ
-#define PROJ BOOT
+#define PROJ APP
 #endif
 /*********************************************************************
  * @fn      main
@@ -154,22 +154,22 @@ int main(void)
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SystemCoreClockUpdate();
     Delay_Init();
-    // USART_Printf_Init(115200);
-    // printf("SystemClk:%d\r\n",SystemCoreClock);
-    // printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n",SystemCoreClock);
+    printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 #if PROJ == APP
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    enable_power_output();
+    // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    // enable_power_output();
 
-    uartx_preinit();
-    chry_dap_init(0, USBHS_BASE);
+    // uartx_preinit();
+    chry_dap_init(0, 0);
     while (!usb_device_is_configured(0)) {
     }
 
     while (1) {
         chry_dap_handle();
-        chry_dap_usb2uart_handle();
+        // chry_dap_usb2uart_handle();
     }
 #elif PROJ == BOOT
     void check_iap_status(void);

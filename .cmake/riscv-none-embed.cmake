@@ -49,7 +49,8 @@ add_compile_options(
     -fno-common
     -Wunused
     -Wuninitialized
-    -Os
+    -O0
+    -g
 )
 
 add_link_options(
@@ -83,5 +84,5 @@ if(PROJ_VALUE STREQUAL "APP")
 elseif(PROJ_VALUE STREQUAL "BOOT")
     add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)
     add_link_options(-Wl,--defsym=__flash_origin=0x00000000)
-    add_link_options(-Wl,--defsym=__flash_length=16K)
+    add_link_options(-Wl,--defsym=__flash_length=8K)
 endif()
