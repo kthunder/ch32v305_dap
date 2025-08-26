@@ -70,7 +70,7 @@ static void key_scan(void)
 }
 
 #define APP_RUN_ADDR (0x08002000)
-extern void msc_ram_init(void);
+extern void msc_ram_init(uint8_t busid, uintptr_t reg_base);
 
 void check_iap_status(void)
 {
@@ -97,18 +97,18 @@ void check_iap_status(void)
     if (io_status && (*(uint8_t *)APP_RUN_ADDR == 0x6F)) {
         NVIC_SetPendingIRQ(Software_IRQn);
     } else {
-        msc_ram_init();
+        // msc_ram_init(0, USBHSD);
         while (1) {
             static uint32_t counter = 0;
             key_scan();
             Delay_Ms(1);
             GPIO_WriteBit(GPIOC, GPIO_Pin_9, counter++ % 1000 > 500);
-            if (flash_start) {
-                // printf("TIMER %d s\r\n", sys_time_ms());
-                // printf("flash_timer %d s\r\n", flash_timer);
-                if (sys_time_ms() - flash_timer > 3000)
-                    NVIC_SystemReset();
-            }
+            // if (flash_start) {
+            //     // printf("TIMER %d s\r\n", sys_time_ms());
+            //     // printf("flash_timer %d s\r\n", flash_timer);
+            //     if (sys_time_ms() - flash_timer > 3000)
+            //         NVIC_SystemReset();
+            // }
         }
     }
 }

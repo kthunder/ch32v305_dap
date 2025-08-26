@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, sakumisu
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 #include "usbd_core.h"
 #include "usbd_msc.h"
 #include "debug.h"
@@ -90,36 +95,36 @@ const uint8_t msc_ram_descriptor[] = {
     0x00,
     0x00,
     0x40,
-    0x01,
+    0x00,
     0x00,
 #endif
     0x00
 };
 
-// void usbd_event_handler(uint8_t event)
-// {
-//     switch (event) {
-//         case USBD_EVENT_RESET:
-//             break;
-//         case USBD_EVENT_CONNECTED:
-//             break;
-//         case USBD_EVENT_DISCONNECTED:
-//             break;
-//         case USBD_EVENT_RESUME:
-//             break;
-//         case USBD_EVENT_SUSPEND:
-//             break;
-//         case USBD_EVENT_CONFIGURED:
-//             break;
-//         case USBD_EVENT_SET_REMOTE_WAKEUP:
-//             break;
-//         case USBD_EVENT_CLR_REMOTE_WAKEUP:
-//             break;
+static void usbd_event_handler(uint8_t busid, uint8_t event)
+{
+    switch (event) {
+        case USBD_EVENT_RESET:
+            break;
+        case USBD_EVENT_CONNECTED:
+            break;
+        case USBD_EVENT_DISCONNECTED:
+            break;
+        case USBD_EVENT_RESUME:
+            break;
+        case USBD_EVENT_SUSPEND:
+            break;
+        case USBD_EVENT_CONFIGURED:
+            break;
+        case USBD_EVENT_SET_REMOTE_WAKEUP:
+            break;
+        case USBD_EVENT_CLR_REMOTE_WAKEUP:
+            break;
 
-//         default:
-//             break;
-//     }
-// }
+        default:
+            break;
+    }
+}
 
 #define SECTOR_SIZE      512
 #define TOTAL_SECTORS    2048 // 1024KB = 2048扇区
@@ -152,7 +157,7 @@ const uint8_t BootSector[] = {
     // [62 ... 509] = 0x00,// Boot code (fill with 0)
     // 0x55, 0xAA // Boot sector signature(write in func)
 };
-void usbd_msc_get_cap(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
+void usbd_msc_get_cap(uint8_t busid, uint8_t lun, uint32_t *block_num, uint32_t *block_size)
 {
     *block_num = TOTAL_SECTORS; //Pretend having so many buffer,not has actually.
     *block_size = SECTOR_SIZE;
@@ -161,7 +166,7 @@ void usbd_msc_get_cap(uint8_t lun, uint32_t *block_num, uint16_t *block_size)
 // Sector 1-2: FAT Table (FAT表，2个扇区)
 // Sector 3: Root Directory (根目录)
 // Sector 4+: Data Area (数据区)
-int usbd_msc_sector_read(uint32_t sector, uint8_t *buffer, uint32_t length)
+int usbd_msc_sector_read(uint8_t busid, uint8_t lun, uint32_t  sector, uint8_t *buffer, uint32_t length)
 {
     if (sector == 0) {
         memcpy(buffer, BootSector, sizeof(BootSector));
@@ -183,8 +188,10 @@ int usbd_msc_sector_read(uint32_t sector, uint8_t *buffer, uint32_t length)
 }
 bool flash_start = false;
 uint32_t flash_timer = 0;
-int usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length)
+int usbd_msc_sector_write(uint8_t busid, uint8_t lun, uint32_t sector, uint8_t *buffer, uint32_t length)
 {
+//  if (sector < BLOCK_COUNT)
+//      memcpy(mass_block[sector].BlockSpace, buffer, length);
     if (sector >= 12) {
         flash_start = true;
         uint32_t offset = (sector - 12) * SECTOR_SIZE;
@@ -197,9 +204,9 @@ int usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length)
         // // printf("\n");
 #include "Internal_Flash.h"
         // if (0x08020000 + offset < 0x08040000) {
-            IFlash_Prog_512((uint32_t)(0x08002000 + offset), (uint32_t *)buffer);
-            // FLASH_ROM_ERASE(0x08020000 + offset, length);
-            // FLASH_ROM_WRITE(0x08020000 + offset, buffer, length);
+            // IFlash_Prog_512((uint32_t)(0x08002000 + offset), (uint32_t *)buffer);
+            FLASH_ROM_ERASE(0x08002000 + offset, length);
+            FLASH_ROM_WRITE(0x08002000 + offset, buffer, length);
             // printf("sector %03d, size %d, x %08X \r\n", sector, length, x);
             // printf("addr %08X \r\n", (uint32_t)(0x08020000 + offset));
         // }
@@ -208,12 +215,19 @@ int usbd_msc_sector_write(uint32_t sector, uint8_t *buffer, uint32_t length)
     return 0;
 }
 
-struct usbd_interface intf0;
+static struct usbd_interface intf0;
 
-void msc_ram_init(void)
+void msc_ram_init(uint8_t busid, uintptr_t reg_base)
 {
-    usbd_desc_register(msc_ram_descriptor);
-    usbd_add_interface(usbd_msc_init_intf(&intf0, MSC_OUT_EP, MSC_IN_EP));
+    usbd_desc_register(busid, msc_ram_descriptor);
+    usbd_add_interface(busid, usbd_msc_init_intf(busid, &intf0, MSC_OUT_EP, MSC_IN_EP));
 
-    usbd_initialize();
+    usbd_initialize(busid, reg_base, usbd_event_handler);
 }
+
+#if defined(CONFIG_USBDEV_MSC_POLLING)
+void msc_ram_polling(uint8_t busid)
+{
+    usbd_msc_polling(busid);
+}
+#endif

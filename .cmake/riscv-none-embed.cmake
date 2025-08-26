@@ -23,21 +23,21 @@ set(CMAKE_EXECUTABLE_SUFFIX_CXX     ".elf")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-    message(STATUS "Maximum optimization for speed")
-    # flto
-    add_compile_options(-flto)
-    add_compile_options(-O3 -g)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
-    message(STATUS "Maximum optimization for speed, debug info included")
-    add_compile_options(-Ofast -g)
-elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
-    message(STATUS "Maximum optimization for size")
-    add_compile_options(-Os)
-else ()
-    message(STATUS "Minimal optimization, debug info included")
-    add_compile_options(-O0 -g -gdwarf-2)
-endif ()
+# if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+#     message(STATUS "Maximum optimization for speed")
+#     # flto
+#     # add_compile_options(-flto)
+#     add_compile_options(-O3 -g)
+# elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "RelWithDebInfo")
+#     message(STATUS "Maximum optimization for speed, debug info included")
+#     add_compile_options(-Ofast -g)
+# elseif ("${CMAKE_BUILD_TYPE}" STREQUAL "MinSizeRel")
+#     message(STATUS "Maximum optimization for size")
+#     add_compile_options(-Os)
+# else ()
+#     message(STATUS "Minimal optimization, debug info included")
+#     add_compile_options(-O0 -g -gdwarf-2)
+# endif ()
 
 # MCU specific flags
 add_compile_options(
@@ -50,7 +50,6 @@ add_compile_options(
     -Wunused
     -Wuninitialized
     -Os
-    -flto
 )
 
 add_link_options(
@@ -62,7 +61,6 @@ add_link_options(
     -Wl,--print-memory-usage
     --specs=nano.specs --specs=nosys.specs
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections
-    -flto
 )
 
 # 读取 main.c 文件内容
@@ -85,5 +83,5 @@ if(PROJ_VALUE STREQUAL "APP")
 elseif(PROJ_VALUE STREQUAL "BOOT")
     add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)
     add_link_options(-Wl,--defsym=__flash_origin=0x00000000)
-    add_link_options(-Wl,--defsym=__flash_length=8K)
+    add_link_options(-Wl,--defsym=__flash_length=16K)
 endif()
