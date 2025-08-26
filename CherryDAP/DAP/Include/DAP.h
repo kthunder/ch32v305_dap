@@ -30,10 +30,12 @@
 
 
 // DAP Firmware Version
+#ifndef DAP_FW_VER
 #ifdef  DAP_FW_V1
 #define DAP_FW_VER                      "1.3.0"
 #else
 #define DAP_FW_VER                      "2.1.1"
+#endif
 #endif
 
 // DAP Command IDs
@@ -322,14 +324,18 @@ extern uint32_t DAP_ExecuteCommand       (const uint8_t *request, uint8_t *respo
 
 extern void     DAP_Setup (void);
 
+void Set_Clock_Delay(uint32_t clock);
+
 // Configurable delay for clock generation
 #ifndef DELAY_SLOW_CYCLES
 #define DELAY_SLOW_CYCLES       3U      // Number of cycles for one iteration
 #endif
 
 __STATIC_FORCEINLINE void PIN_DELAY_SLOW (uint32_t delay) {
-  uint32_t count = delay;
-  while (--count);
+  volatile uint32_t count = delay;
+    do {
+        count -= 1;
+    } while (count);
 }
 
 // Fixed delay for fast clock generation

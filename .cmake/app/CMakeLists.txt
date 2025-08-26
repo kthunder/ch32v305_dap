@@ -15,12 +15,12 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/SRC/Debug
     ${CMAKE_SOURCE_DIR}/SRC/Peripheral/inc
     ${CMAKE_SOURCE_DIR}/User
-    ${CMAKE_SOURCE_DIR}/CherryUSB/class/cdc
-    ${CMAKE_SOURCE_DIR}/CherryUSB/class/msc
-    ${CMAKE_SOURCE_DIR}/CherryUSB/common
-    ${CMAKE_SOURCE_DIR}/CherryUSB/core
-    ${CMAKE_SOURCE_DIR}/CherryUSB/port/ch32
-    ${CMAKE_SOURCE_DIR}/CherryRB
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/common
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryRB
     ${CMAKE_SOURCE_DIR}/CherryDAP
     ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Include
     ${CMAKE_SOURCE_DIR}/DAPHost
@@ -30,11 +30,11 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/SRC/*.c
     ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/class/cdc/usbd_msc.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/class/cdc/usbd_cdc.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/core/usbd_core.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/port/ch32/usb_dc_usbhs.c
-    ${CMAKE_SOURCE_DIR}/CherryRB/chry_ringbuffer.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_msc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryRB/chry_ringbuffer.c
     ${CMAKE_SOURCE_DIR}/DAPHost/swd_host.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Source/*.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/dap_main.c
@@ -47,9 +47,9 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/SRC/*.c
     ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/class/msc/usbd_msc.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/core/usbd_core.c
-    ${CMAKE_SOURCE_DIR}/CherryUSB/port/ch32/usb_dc_usbhs.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
 )
 list(REMOVE_ITEM SOURCES 
     ${CMAKE_SOURCE_DIR}/User/usb2uart.c
