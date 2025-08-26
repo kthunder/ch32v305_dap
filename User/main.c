@@ -97,7 +97,7 @@ void check_iap_status(void)
     if (io_status && (*(uint8_t *)APP_RUN_ADDR == 0x6F)) {
         NVIC_SetPendingIRQ(Software_IRQn);
     } else {
-        // msc_ram_init(0, USBHSD);
+        // msc_ram_init(0, USBHS_BASE);
         while (1) {
             static uint32_t counter = 0;
             key_scan();
@@ -146,8 +146,8 @@ int main(void)
     enable_power_output();
 
     uartx_preinit();
-    chry_dap_init();
-    while (!usb_device_is_configured()) {
+    chry_dap_init(0, USBHS_BASE);
+    while (!usb_device_is_configured(0)) {
     }
 
     while (1) {

@@ -193,8 +193,8 @@ int usbd_msc_sector_write(uint8_t busid, uint8_t lun, uint32_t sector, uint8_t *
 //  if (sector < BLOCK_COUNT)
 //      memcpy(mass_block[sector].BlockSpace, buffer, length);
     if (sector >= 12) {
-        flash_start = true;
-        uint32_t offset = (sector - 12) * SECTOR_SIZE;
+        // flash_start = true;
+        // uint32_t offset = (sector - 12) * SECTOR_SIZE;
 
         // uint32_t x = 0;
         // for (int i = 0; i < length; i++) {
@@ -205,8 +205,8 @@ int usbd_msc_sector_write(uint8_t busid, uint8_t lun, uint32_t sector, uint8_t *
 #include "Internal_Flash.h"
         // if (0x08020000 + offset < 0x08040000) {
             // IFlash_Prog_512((uint32_t)(0x08002000 + offset), (uint32_t *)buffer);
-            FLASH_ROM_ERASE(0x08002000 + offset, length);
-            FLASH_ROM_WRITE(0x08002000 + offset, buffer, length);
+            // FLASH_ROM_ERASE(0x08002000 + offset, length);
+            // FLASH_ROM_WRITE(0x08002000 + offset, buffer, length);
             // printf("sector %03d, size %d, x %08X \r\n", sector, length, x);
             // printf("addr %08X \r\n", (uint32_t)(0x08020000 + offset));
         // }
