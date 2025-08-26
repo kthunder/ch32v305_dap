@@ -41,14 +41,28 @@ void usb_dc_low_level_init(void)
     USBHS_RCC_Init();
     NVIC_EnableIRQ(USBHS_IRQn);
 }
-
+uint32_t buf[256 / 4] = { 0 };
 // for bootloader
 void short_press(void)
 {
+    for (uint32_t i = 0; i <= 0x10000; i += 0x100) {
+        memcpy(buf, (void *)(0x08020000 + i), 256);
+        FLASH_ROM_ERASE(0x08002000 + i, 0x100);
+        FLASH_ROM_WRITE(0x08002000 + i, buf, 0x100);
+        GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
+    }
+    NVIC_SystemReset();
 }
 
 void long_press(void)
 {
+    for (uint32_t i = 0; i <= 0x10000; i += 0x100) {
+        memcpy(buf, (void *)(0x08030000 + i), 256);
+        FLASH_ROM_ERASE(0x08002000 + i, 0x100);
+        FLASH_ROM_WRITE(0x08002000 + i, buf, 0x100);
+        GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
+    }
+    NVIC_SystemReset();
 }
 
 #define THRESHOLD 10
@@ -93,6 +107,9 @@ void check_iap_status(void)
         io_status += GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7);
     }
 
+    while (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == 0)
+        ;
+
     NVIC_EnableIRQ(Software_IRQn);
     if (io_status && (*(uint8_t *)APP_RUN_ADDR == 0x6F)) {
         NVIC_SetPendingIRQ(Software_IRQn);
@@ -119,7 +136,7 @@ void SW_Handler(void)
     __asm("jr  a6");
 }
 
-#define APP  0 
+#define APP  0
 #define BOOT 1
 
 #ifndef PROJ
@@ -155,7 +172,7 @@ int main(void)
         chry_dap_usb2uart_handle();
     }
 #elif PROJ == BOOT
-void check_iap_status(void);
+    void check_iap_status(void);
     check_iap_status();
 #endif
 }
