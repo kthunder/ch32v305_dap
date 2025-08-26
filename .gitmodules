@@ -1,0 +1,3 @@
+[submodule "CherryDAP"]
+	path = CherryDAP
+	url = https://github.com/cherry-embedded/CherryDAP.git
