@@ -7,12 +7,13 @@
 #define CHERRYUSB_CONFIG_H
 
 /* ================ USB common Configuration ================ */
+#define CONFIG_USBDEV_ADVANCE_DESC
 
-#define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
-// #define CONFIG_USB_PRINTF(...) 
+// #define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
+#define CONFIG_USB_PRINTF(...)
 
 #ifndef CONFIG_USB_DBG_LEVEL
-#define CONFIG_USB_DBG_LEVEL USB_DBG_LOG
+#define CONFIG_USB_DBG_LEVEL USB_DBG_INFO
 #endif
 
 /* Enable print with color */
