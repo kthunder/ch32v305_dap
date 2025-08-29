@@ -31,7 +31,7 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/SRC/*.c
     # ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc_acm.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/hid/usbd_hid.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c

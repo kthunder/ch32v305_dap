@@ -140,7 +140,7 @@ void SW_Handler(void)
 #define BOOT 1
 
 #ifndef PROJ
-#define PROJ BOOT
+#define PROJ APP
 #endif
 /*********************************************************************
  * @fn      main
@@ -155,16 +155,16 @@ int main(void)
     SystemCoreClockUpdate();
     Delay_Init();
     // USART_Printf_Init(115200);
-    // printf("SystemClk:%d\r\n",SystemCoreClock);
-    // printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
+    // printf("SystemClk:%d\r\n", SystemCoreClock);
+    // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
 #if PROJ == APP
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    enable_power_output();
-    
+    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    // enable_power_output();
+
     uartx_preinit();
-    chry_dap_init();
-    while (!usb_device_is_configured()) {
+    chry_dap_init(0,0);
+    while (!usb_device_is_configured(0)) {
     }
 
     while (1) {
