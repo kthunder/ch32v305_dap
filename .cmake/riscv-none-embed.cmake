@@ -49,7 +49,7 @@ add_compile_options(
     -fno-common
     -Wunused
     -Wuninitialized
-    -O0
+    -Os
     -g
 )
 
@@ -79,7 +79,7 @@ endif()
 # 根据 PROJ 值选择链接脚本
 if(PROJ_VALUE STREQUAL "APP")
     add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)
-    add_link_options(-Wl,--defsym=__flash_origin=0x00000000)
+    add_link_options(-Wl,--defsym=__flash_origin=0x00002000)
     add_link_options(-Wl,--defsym=__flash_length=120K)
 elseif(PROJ_VALUE STREQUAL "BOOT")
     add_link_options(-T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld)

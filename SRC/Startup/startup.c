@@ -106,7 +106,7 @@ FUNC_ALIAS(Default_Handler, DMA2_Channel11_IRQHandler);
 void Reset_Handler();
 
 SECTION_DATA(".vector")
-static void (*vector[256])(void) = {
+void (*vector[128])(void) = {
     Reset_Handler,
     0,
     NMI_Handler,       /* NMI */

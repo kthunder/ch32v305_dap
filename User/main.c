@@ -111,7 +111,7 @@ void check_iap_status(void)
         ;
 
     NVIC_EnableIRQ(Software_IRQn);
-    if (io_status && (*(uint8_t *)APP_RUN_ADDR == 0x6F)) {
+    if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0xEF))) {
         NVIC_SetPendingIRQ(Software_IRQn);
     } else {
         // msc_ram_init(0, 0);
@@ -140,7 +140,7 @@ void SW_Handler(void)
 #define BOOT 1
 
 #ifndef PROJ
-#define PROJ APP
+#define PROJ BOOT
 #endif
 /*********************************************************************
  * @fn      main
@@ -159,11 +159,12 @@ int main(void)
     // printf( "ChipID:%08x\r\n", DBGMCU_GetCHIPID() );
 #if PROJ == APP
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    // enable_power_output();
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    enable_power_output();
+    
     uartx_preinit();
-    chry_dap_init(0, USBHS_BASE);
-    while (!usb_device_is_configured(0)) {
+    chry_dap_init();
+    while (!usb_device_is_configured()) {
     }
 
     while (1) {

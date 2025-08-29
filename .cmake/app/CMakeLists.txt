@@ -31,16 +31,16 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/SRC/*.c
     # ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc_acm.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/hid/usbd_hid.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/hid/usbd_hid.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/demo/cdc_acm_template.c
+    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/demo/cdc_acm_template.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryRB/chry_ringbuffer.c
-    # ${CMAKE_SOURCE_DIR}/DAPHost/swd_host.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Source/*.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/dap_main.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Source/*.c
+    ${CMAKE_SOURCE_DIR}/CherryDAP/dap_main.c
+    ${CMAKE_SOURCE_DIR}/DAPHost/swd_host.c
 )
 list(REMOVE_ITEM SOURCES 
     ${CMAKE_SOURCE_DIR}/User/msc_ram_template.c
