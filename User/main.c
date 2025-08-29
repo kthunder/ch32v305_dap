@@ -159,8 +159,8 @@ int main(void)
     // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
 #if PROJ == APP
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    // enable_power_output();
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    enable_power_output();
 
     uartx_preinit();
     chry_dap_init(0,0);
