@@ -1,4 +1,4 @@
-ENTRY( _start )
+ENTRY( Reset_Handler )
 
 __stack_size = 2048;
 
@@ -45,8 +45,8 @@ SECTIONS
 
   .vector :
   {
-      *(.vector);
 	  . = ALIGN(64);
+      KEEP(*(.vector));
   } >FLASH AT>FLASH
 
 	.text :
@@ -186,6 +186,3 @@ SECTIONS
     } >RAM 
 
 }
-
-
-
