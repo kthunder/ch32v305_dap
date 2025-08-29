@@ -1,27 +1,20 @@
 #include "usb2uart.h"
 
-uint8_t RxBuffer1[UART_DMA_BUF_LEN];
-//void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
 // 添加回调函数指针
 static uint32_t dma_tx_length = 0;
 // DMA发送缓冲区和状态
 static uint8_t uart3_tx_buffer[256];
-static volatile uint8_t uart3_tx_busy = 0;
+static volatile uint8_t uart3_dma_tx_busy = 0;
 static uint8_t uart3_rx_buffer[UART_DMA_BUF_LEN];
 static volatile uint16_t uart3_rx_write_pos = 0;
 extern chry_ringbuffer_t g_uartrx; // 假设这个环形缓冲区已定义
-void uart3_dma_init(void)
+void uart_init()
 {
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
     USART_InitTypeDef USART_InitStructure = { 0 };
-    DMA_InitTypeDef DMA_InitStructure = { 0 };
     NVIC_InitTypeDef NVIC_InitStructure = { 0 };
-
-    // 使能时钟
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-
     // 配置GPIO
     // PB10: USART3_TX
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
@@ -43,6 +36,25 @@ void uart3_dma_init(void)
     USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     USART_Init(USART3, &USART_InitStructure);
 
+    // 启用USART3空闲中断用于接收处理
+    USART_ITConfig(USART3, USART_IT_IDLE, ENABLE);
+    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
+    USART_Cmd(USART3, ENABLE);
+}
+
+void uart3_dma_init(void)
+{
+    DMA_InitTypeDef DMA_InitStructure = { 0 };
+    NVIC_InitTypeDef NVIC_InitStructure = { 0 };
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
+
+    /*********** USART3_TX DMA CONFIG **********/
     // 配置DMA1_Channel2 (USART3_TX)
     DMA_DeInit(DMA1_Channel2);
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART3->DATAR;
@@ -58,7 +70,17 @@ void uart3_dma_init(void)
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel2, &DMA_InitStructure);
 
-    // 配置DMA1_Channel3 (USART3_RX) - 新增
+    // 使能DMA传输完成中断
+    DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
+
+    // 配置DMA中断
+    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+
+    /*********** USART3_RX DMA CONFIG **********/
     DMA_DeInit(DMA1_Channel3);
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&USART3->DATAR;
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)uart3_rx_buffer;
@@ -73,28 +95,7 @@ void uart3_dma_init(void)
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel3, &DMA_InitStructure);
 
-    // 使能DMA传输完成中断
-    DMA_ITConfig(DMA1_Channel2, DMA_IT_TC, ENABLE);
-
-    // 配置DMA中断
-    NVIC_InitStructure.NVIC_IRQChannel = DMA1_Channel2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    // 启用USART3空闲中断用于接收处理
-    USART_ITConfig(USART3, USART_IT_IDLE, ENABLE);
-    NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-
-    // 使能USART3
     DMA_Cmd(DMA1_Channel3, ENABLE);
-    USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
-    USART_Cmd(USART3, ENABLE);
 }
 // 处理接收数据
 void uart3_process_rx_data(void)
@@ -140,11 +141,11 @@ void USART3_IRQHandler(void)
 // DMA发送函数
 void uart3_dma_send(uint8_t *data, uint16_t len)
 {
-    if (uart3_tx_busy || len == 0 || len > sizeof(uart3_tx_buffer)) {
+    if (uart3_dma_tx_busy || len == 0 || len > sizeof(uart3_tx_buffer)) {
         return;
     }
 
-    uart3_tx_busy = 1;
+    uart3_dma_tx_busy = 1;
 
     // 复制数据到发送缓冲区
     memcpy(uart3_tx_buffer, data, len);
@@ -173,17 +174,12 @@ void DMA1_Channel2_IRQHandler(void)
         USART_DMACmd(USART3, USART_DMAReq_Tx, DISABLE);
 
         // 清除忙标志
-        uart3_tx_busy = 0;
+        uart3_dma_tx_busy = 0;
 
         chry_dap_usb2uart_uart_send_complete(dma_tx_length);
 
         // printf("UART3 DMA TX complete!\r\n");
     }
-}
-// 检查发送是否完成
-uint8_t uart3_dma_is_busy(void)
-{
-    return uart3_tx_busy;
 }
 
 void uartx_preinit(void)
@@ -194,7 +190,7 @@ void uartx_preinit(void)
 /* implment by user */
 void chry_dap_usb2uart_uart_send_bydma(uint8_t *data, uint16_t len)
 {
-    if (uart3_dma_is_busy()) {
+    if (uart3_dma_tx_busy) {
         chry_dap_usb2uart_uart_send_complete(0);
         return;
     }
@@ -202,7 +198,8 @@ void chry_dap_usb2uart_uart_send_bydma(uint8_t *data, uint16_t len)
     uart3_dma_send(data, len);
     dma_tx_length = len;
 }
+/* implment by user */
 void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
 {
-    uart3_dma_init();
+    // do nothing
 }
