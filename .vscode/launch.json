@@ -12,33 +12,14 @@
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
-            // "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
+            // "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
+            "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
             "gdbPath": "riscv-wch-elf-gdb",
             "configFiles": [
-                // "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch-riscv.cfg",
-                "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+                "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch-riscv.cfg",
+                // "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
             ],
-            // "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
-            "liveWatch": {
-                "enabled": false,
-                "samplesPerSecond": 4
-            },
-            "preLaunchTask": "Build",
-            "rttConfig": {
-                "enabled": false,
-                "searchId": "SEGGER RTT",
-                "address": "536871312",
-                "searchSize": 2000,
-                "rtt_start_retry": 1000,
-                "decoders": [
-                    {
-                        "label": "",
-                        "port": 0,
-                        "type": "console"
-                    }
-                ]
-            }
+            "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
         },
         {
             "name": "attach",
@@ -54,24 +35,6 @@
                 "${env:WCH_OPENOCD_PATH}/bin/wch-riscv.cfg",
             ],
             "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
-            "liveWatch": {
-                "enabled": false,
-                "samplesPerSecond": 4
-            },
-            "rttConfig": {
-                "enabled": false,
-                "searchId": "SEGGER RTT",
-                "address": "536870912",
-                "searchSize": 2000,
-                "rtt_start_retry": 1000,
-                "decoders": [
-                    {
-                        "label": "",
-                        "port": 0,
-                        "type": "console"
-                    }
-                ]
-            }
         },
     ]
 }
