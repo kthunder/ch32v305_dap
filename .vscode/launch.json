@@ -12,28 +12,43 @@
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            // "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
-            "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
             "gdbPath": "riscv-wch-elf-gdb",
-            "configFiles": [
-                "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch-riscv.cfg",
-                // "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
-            ],
+            "osx": {
+                "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
+                "configFiles": [
+                    "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch-riscv.cfg",
+                ],
+            },
+            "windows": {
+                "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
+                "configFiles": [
+                    "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+                ],
+            },
+            // "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
             "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
         },
         {
             "name": "attach",
             "cwd": "${workspaceFolder}",
-            "executable": "./build/Debug/${workspaceFolderBasename}.elf",
+            "executable": "./build/${workspaceFolderBasename}.elf",
             "request": "attach",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            "serverpath": "${env:WCH_OPENOCD_PATH}/bin/openocd",
             "gdbPath": "riscv-wch-elf-gdb",
-            "configFiles": [
-                "${env:WCH_OPENOCD_PATH}/bin/wch-riscv.cfg",
-            ],
+            "osx": {
+                "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
+                "configFiles": [
+                    "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch-riscv.cfg",
+                ],
+            },
+            "windows": {
+                "serverpath": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
+                "configFiles": [
+                    "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+                ],
+            },
             "svdFile": "${env:WCH_GCC_PATH}/SDK/default/RISC-V/CH32X035/NoneOS/CH32X035xx.svd",
         },
     ]

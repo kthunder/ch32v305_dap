@@ -221,8 +221,6 @@ static void __memset(uint8_t *dist, uint8_t val, uint32_t len)
 }
 static void __memcpy(uint8_t *dist, uint8_t *src, uint32_t len)
 {
-    // 直接查看寄存器，不要修改
-    asm volatile("nop" : : : "a0", "a1", "a2"); // 只是为了在调试器中查看
     while (len--)
         *dist++ = *src++;
 }

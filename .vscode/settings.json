@@ -23,5 +23,5 @@
         "--clang-tidy",
         "--log=verbose"
     ],
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
 }
