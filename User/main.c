@@ -14,7 +14,7 @@ void move_fw(uint32_t addr)
         IFlash_Prog_512(0x08002000 + i, buf);
         GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
     }
-    NVIC_SetPendingIRQ(Software_IRQn);
+    NVIC_SystemReset();
 }
 
 void short_press(void)
