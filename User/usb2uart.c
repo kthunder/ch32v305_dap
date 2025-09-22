@@ -8,7 +8,7 @@ static volatile uint8_t uart3_dma_tx_busy = 0;
 static uint8_t uart3_rx_buffer[UART_DMA_BUF_LEN];
 static volatile uint16_t uart3_rx_write_pos = 0;
 extern chry_ringbuffer_t g_uartrx; // 假设这个环形缓冲区已定义
-void uart_init()
+void uart_init(uint32_t BaudRate)
 {
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
     USART_InitTypeDef USART_InitStructure = { 0 };
@@ -28,7 +28,7 @@ void uart_init()
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     // 配置USART3
-    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_BaudRate = BaudRate;
     USART_InitStructure.USART_WordLength = USART_WordLength_8b;
     USART_InitStructure.USART_StopBits = USART_StopBits_1;
     USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -201,5 +201,5 @@ void chry_dap_usb2uart_uart_send_bydma(uint8_t *data, uint16_t len)
 /* implment by user */
 void chry_dap_usb2uart_uart_config_callback(struct cdc_line_coding *line_coding)
 {
-    // do nothing
+    uart_init(line_coding->dwDTERate);
 }

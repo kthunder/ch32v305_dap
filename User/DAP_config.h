@@ -61,7 +61,7 @@ This information includes:
 
 /// Processor Clock of the Cortex-M MCU used in the Debug Unit.
 /// This value is used to calculate the SWD/JTAG clock speed.
-#define CPU_CLOCK           32000000U      ///< Specifies the CPU Clock in Hz.
+#define CPU_CLOCK           144000000U      ///< Specifies the CPU Clock in Hz.
 
 /// Number of processor cycles for I/O Port write operations.
 /// This value is used to calculate the SWD/JTAG clock speed that is generated with I/O
@@ -69,7 +69,7 @@ This information includes:
 /// require 2 processor cycles for a I/O Port Write operation.  If the Debug Unit uses
 /// a Cortex-M0+ processor with high-speed peripheral I/O only 1 processor cycle might be
 /// required.
-#define IO_PORT_WRITE_CYCLES    2U              ///< I/O Cycles: 2=default, 1=Cortex-M0+ fast I/0.
+#define IO_PORT_WRITE_CYCLES    1U              ///< I/O Cycles: 2=default, 1=Cortex-M0+ fast I/0.
 
 /// Indicate that Serial Wire Debug (SWD) communication mode is available at the Debug Access Port.
 /// This information is returned by the command \ref DAP_Info as part of <b>Capabilities</b>.
@@ -187,15 +187,13 @@ __STATIC_INLINE uint8_t DAP_GetProductString (char *str) {
 */
 __STATIC_INLINE uint8_t DAP_GetSerNumString (char *str) {
     uint32_t IC_UID;
-    IC_UID = *(uint32_t*)0x1FFFF7E8 & 0x0001FFFF;                                                     //ȡǰ��0~16λ,17λ����ӦΨһʶ����0~16λ
-    IC_UID |= (((*(uint32_t*)(0x1FFFF7E8)) & (0x0000000F << 28)) >> 28 << 17);        //ȡ28��31λ��4λ ����Ӧ17-20
-    IC_UID |= (((*(uint32_t*)(0x1FFFF7E8 + 4)) & 0x00000003) << 21);                          //ȡ32~33��2λ����Ӧ21~22
-    IC_UID |= ((((*(uint32_t*)(0x1FFFF7E8 + 8)) & (0x000001FF << 15)) >> 15) << 23);  //ȡ���9λ,��ӦΨһʶ����23~31
+    IC_UID = *(uint32_t*)0x1FFFF7E8 & 0x0001FFFF;
+    IC_UID |= (((*(uint32_t*)(0x1FFFF7E8)) & (0x0000000F << 28)) >> 28 << 17);
+    IC_UID |= (((*(uint32_t*)(0x1FFFF7E8 + 4)) & 0x00000003) << 21);
+    IC_UID |= ((((*(uint32_t*)(0x1FFFF7E8 + 8)) & (0x000001FF << 15)) >> 15) << 23);
 
-    static char UID_BUF[9];
-    sprintf(UID_BUF, "%08X", IC_UID);
-    memcpy((unsigned char*)str, UID_BUF, sizeof(UID_BUF));
-    return sizeof(UID_BUF);
+    sprintf(str, "%08X", IC_UID);
+    return 9;
 }
 
 /** Get Target Device Vendor string.
@@ -312,13 +310,64 @@ of the same I/O port. The following SWDIO I/O Pin functions are provided:
  - \ref PIN_SWDIO_IN to read from the SWDIO I/O pin with utmost possible speed.
  - \ref PIN_SWDIO_OUT to write to the SWDIO I/O pin with utmost possible speed.
 */
-
+// GPIOA
+#define PORT_CLK GPIOA
+#define PORT_DIO GPIOA
 #define PIN_CLK GPIO_Pin_14
 #define PIN_DIO GPIO_Pin_13
-
+// GPIOB
+#define PORT_TDI GPIOB
+#define PORT_TDO GPIOB
 #define PIN_TDI GPIO_Pin_15
 #define PIN_TDO GPIO_Pin_14
+
+#define PORT_DIR GPIOB
+#define PIN_DIR GPIO_Pin_15
+// GPIOC
+#define PORT_nRESET GPIOC
 #define PIN_nRESET GPIO_Pin_8
+// 每次写gpio外设后需要插入至少3个NOP
+// 0b1000上下拉输入
+// 0b0011推挽输出
+// clang-format off
+#define NOPx1() __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+#define NOPx3() NOPx1();NOPx1();NOPx1();
+#define iPIN_TMS_INPUT_ENABLE()      PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b1000<<((13-8)*4));PORT_DIO->BSHR=PIN_DIO;NOPx3();
+#define iPIN_TMS_INPUT_DISABLE()     PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b0011<<((13-8)*4));NOPx3();
+// #define iPIN_TMSC_OUT_SIDE_SET(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<< 0)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
+// #define iPIN_TMSC_OUT_SIDE_CLR(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<<16)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
+
+#define iGPIO_PUT(port, pin, val)   port->BSHR = ((val)&1)?pin:(pin<<16)
+#define iGPIO_GET(port, pin)        ((port->INDR & pin)>0)
+#define iGPIO_SET(port, pin)        port->BSHR = pin
+#define iGPIO_CLR(port, pin)        port->BCR = pin
+
+#define iPIN_TCK_SET()  iGPIO_SET(PORT_CLK, PIN_CLK);NOPx3();
+#define iPIN_TCK_CLR()  iGPIO_CLR(PORT_CLK, PIN_CLK);NOPx3();
+#define iPIN_TMS_SET()  iGPIO_SET(PORT_DIO, PIN_DIO);NOPx3();
+#define iPIN_TMS_CLR()  iGPIO_CLR(PORT_DIO, PIN_DIO);NOPx3();
+#define iPIN_TMS_OUT(x) iGPIO_PUT(PORT_DIO, PIN_DIO, (x&1));NOPx3();
+#define iPIN_TDO_GET()  iGPIO_GET(PORT_DIO, PIN_DIO);NOPx3();
+
+#define JTAG_CYCLE_TCK_FAST(tms, tdi, tdo) \
+    do                                     \
+    {                                      \
+        iPIN_TCK_CLR();                    \
+        iPIN_TMS_OUT(!tdi);                \
+        iPIN_TCK_SET();                    \
+        iPIN_TCK_CLR();                    \
+        iPIN_TMS_OUT(tms);                 \
+        iPIN_TCK_SET();                    \
+        iGPIO_CLR(PORT_DIR, PIN_DIR);      \
+        iPIN_TMS_INPUT_ENABLE();           \
+        iPIN_TCK_CLR();                    \
+        iPIN_TCK_SET();                    \
+        tdo = iPIN_TDO_GET();              \
+        iPIN_TCK_CLR();                    \
+        iGPIO_SET(PORT_DIR, PIN_DIR);      \
+        iPIN_TMS_INPUT_DISABLE();          \
+    } while (0);
+// clang-format on
 
 // Configure DAP I/O pins ------------------------------
 
@@ -385,6 +434,14 @@ __STATIC_INLINE void PORT_SWD_SETUP (void) {
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
     GPIO_SetBits(GPIOC, PIN_nRESET);
+
+    // TDI
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+    GPIO_InitStructure.GPIO_Pin = PIN_TDI;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+    GPIO_SetBits(GPIOB, PIN_TDI);
 }
 
 /** Disable JTAG/SWD I/O Pins.
@@ -417,24 +474,21 @@ __STATIC_INLINE void PORT_OFF (void) {
 \return Current status of the SWCLK/TCK DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWCLK_TCK_IN  (void) {
-//    return GPIO_ReadOutputDataBit(GPIOB, PIN_CLK);
-    return (GPIOA->OUTDR & PIN_CLK) != 0;
+    return iGPIO_GET(PORT_CLK, PIN_CLK);
 }
 
 /** SWCLK/TCK I/O pin: Set Output to High.
 Set the SWCLK/TCK DAP hardware I/O pin to high level.
 */
 __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_SET (void) {
-//    GPIO_SetBits(GPIOB, PIN_CLK);
-    GPIOA->BSHR = PIN_CLK;
+    iGPIO_SET(PORT_CLK, PIN_CLK);
 }
 
 /** SWCLK/TCK I/O pin: Set Output to Low.
 Set the SWCLK/TCK DAP hardware I/O pin to low level.
 */
 __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_CLR (void) {
-//    GPIO_ResetBits(GPIOB, PIN_CLK);
-    GPIOA->BCR = PIN_CLK;
+    iGPIO_CLR(PORT_CLK, PIN_CLK);
 }
 
 
@@ -444,48 +498,35 @@ __STATIC_FORCEINLINE void     PIN_SWCLK_TCK_CLR (void) {
 \return Current status of the SWDIO/TMS DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWDIO_TMS_IN  (void) {
-//    return GPIO_ReadOutputDataBit(GPIOB, PIN_DIO);
-    return (GPIOA->OUTDR & PIN_DIO) != 0;
+    return iGPIO_GET(PORT_DIO, PIN_DIO);
 }
 
 /** SWDIO/TMS I/O pin: Set Output to High.
 Set the SWDIO/TMS DAP hardware I/O pin to high level.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_TMS_SET (void) {
-//    GPIO_SetBits(GPIOB, PIN_DIO);
-    GPIOA->BSHR = PIN_DIO;
+    iGPIO_SET(PORT_DIO, PIN_DIO);
 }
 
 /** SWDIO/TMS I/O pin: Set Output to Low.
 Set the SWDIO/TMS DAP hardware I/O pin to low level.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_TMS_CLR (void) {
-//    GPIO_ResetBits(GPIOB, PIN_DIO);
-    GPIOA->BCR = PIN_DIO;
+    iGPIO_CLR(PORT_DIO, PIN_DIO);
 }
 
 /** SWDIO I/O pin: Get Input (used in SWD mode only).
 \return Current status of the SWDIO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_SWDIO_IN      (void) {
-//    return GPIO_ReadInputDataBit(GPIOB, PIN_DIO);
-    return (GPIOA->INDR & PIN_DIO) != 0;
+    return iGPIO_GET(PORT_DIO, PIN_DIO);
 }
 
 /** SWDIO I/O pin: Set Output (used in SWD mode only).
 \param bit Output value for the SWDIO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT     (uint32_t bit) {
-    if(bit & 0x01)
-    {
-//        GPIO_SetBits(GPIOB, PIN_DIO);
-        GPIOA->BSHR = PIN_DIO;
-    }
-    else
-    {
-        GPIOA->BCR = PIN_DIO;
-//        GPIO_ResetBits(GPIOB, PIN_DIO);
-    }
+    iGPIO_PUT(PORT_DIO, PIN_DIO, bit&1);
 }
 
 /** SWDIO I/O pin: Switch to Output mode (used in SWD mode only).
@@ -493,15 +534,8 @@ Configure the SWDIO DAP hardware I/O pin to output mode. This function is
 called prior \ref PIN_SWDIO_OUT function calls.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_ENABLE  (void) {
-//    GPIO_InitTypeDef GPIO_InitStructure = {0};
-//    5 << 2 (5 * 4)
-
-//    GPIO_InitStructure.GPIO_Pin = PIN_DIO;
-//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    GPIOA->CFGHR &= ~(uint32_t)0x0F << 20;
-    GPIOA->CFGHR |= ((GPIO_Mode_Out_PP | GPIO_Speed_50MHz) << 20);
+    iPIN_TMS_INPUT_DISABLE();
+    iGPIO_SET(PORT_DIR, PIN_DIR);
 }
 
 /** SWDIO I/O pin: Switch to Input mode (used in SWD mode only).
@@ -509,15 +543,8 @@ Configure the SWDIO DAP hardware I/O pin to input mode. This function is
 called prior \ref PIN_SWDIO_IN function calls.
 */
 __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_DISABLE (void) {
-//    GPIO_InitTypeDef GPIO_InitStructure = {0};
-//
-//    GPIO_InitStructure.GPIO_Pin = PIN_DIO;
-//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-//    GPIO_Init(GPIOA, &GPIO_InitStructure);
-//    5 << 2 (5 * 4)
-    GPIOA->CFGHR &= ~(uint32_t)0x0F << 20;
-    GPIOA->CFGHR |= (GPIO_Mode_IN_FLOATING << 20);
+    iPIN_TMS_INPUT_ENABLE();
+    iGPIO_CLR(PORT_DIR, PIN_DIR);
 }
 
 
@@ -527,23 +554,14 @@ __STATIC_FORCEINLINE void     PIN_SWDIO_OUT_DISABLE (void) {
 \return Current status of the TDI DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_TDI_IN  (void) {
-    return (GPIOB->OUTDR & PIN_TDI) != 0;
+    return iGPIO_GET(PORT_TDI, PIN_TDI);
 }
 
 /** TDI I/O pin: Set Output.
 \param bit Output value for the TDI DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE void     PIN_TDI_OUT (uint32_t bit) {
-    if(bit & 0x01)
-    {
-//        GPIO_SetBits(GPIOB, PIN_DIO);
-        GPIOB->BSHR = PIN_TDI;
-    }
-    else
-    {
-        GPIOB->BCR = PIN_TDI;
-//        GPIO_ResetBits(GPIOB, PIN_DIO);
-    }
+    iGPIO_PUT(PORT_TDI, PIN_TDI, bit&1);
 }
 
 
@@ -553,7 +571,7 @@ __STATIC_FORCEINLINE void     PIN_TDI_OUT (uint32_t bit) {
 \return Current status of the TDO DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_TDO_IN  (void) {
-    return (GPIOB->INDR & PIN_TDO) != 0;
+    return iGPIO_GET(PORT_TDO, PIN_TDO);
 }
 
 
@@ -581,7 +599,7 @@ __STATIC_FORCEINLINE void     PIN_nTRST_OUT  (uint32_t bit) {
 \return Current status of the nRESET DAP hardware I/O pin.
 */
 __STATIC_FORCEINLINE uint32_t PIN_nRESET_IN  (void) {
-    return (GPIOC->OUTDR & PIN_nRESET) != 0;
+    return iGPIO_GET(PORT_nRESET, PIN_nRESET);
 }
 
 /** nRESET I/O pin: Set Output.
@@ -593,12 +611,12 @@ extern void swd_set_target_reset(uint8_t asserted);
 __STATIC_FORCEINLINE void     PIN_nRESET_OUT (uint32_t bit) {
     if(bit & 0x01)
     {
-        GPIOC->BSHR = PIN_nRESET;
+        iGPIO_SET(PORT_nRESET, PIN_nRESET);
     }
     else
     {
       // FIX
-        GPIOC->BCR = PIN_nRESET;
+        iGPIO_CLR(PORT_nRESET, PIN_nRESET);
         swd_set_target_reset(0);
     }
 }
@@ -625,13 +643,7 @@ It is recommended to provide the following LEDs for status indication:
            - 0: Connect LED OFF: debugger is not connected to CMSIS-DAP Debug Unit.
 */
 __STATIC_INLINE void LED_CONNECTED_OUT (uint32_t bit) {
-    if(bit & 0x01)
-    {
-        GPIOA->BCR = GPIO_Pin_8;
-    }
-    else {
-        GPIOA->BSHR = GPIO_Pin_8;
-    }
+    iGPIO_PUT(GPIOA, GPIO_Pin_8, bit&1);
 }
 
 /** Debug Unit: Set status Target Running LED.

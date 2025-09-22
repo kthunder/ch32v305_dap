@@ -1,4 +1,4 @@
-ENTRY( Reset_Handler )
+ENTRY( _start )
 
 __stack_size = 2048;
 
@@ -11,7 +11,7 @@ MEMORY
    CH32V30x_D8 - CH32V303CB-CH32V303RB
 */
 
-	FLASH (rx)  : ORIGIN = __flash_origin, LENGTH = __flash_length
+	FLASH (rx)  : ORIGIN = 0x00002000, LENGTH = 128K
 	/* FLASH1 (rx) : ORIGIN = 0x0001E000, LENGTH = 8K */
 	RAM (xrw)   : ORIGIN = 0x20000000, LENGTH = 32K
 
@@ -43,11 +43,11 @@ SECTIONS
 		_einit = .;
 	} >FLASH AT>FLASH
 
-  .vector :
-  {
-	  . = ALIGN(64);
-      KEEP(*(.vector));
-  } >FLASH AT>FLASH
+	.vector :
+	{
+		. = ALIGN(64);
+		KEEP(*(.vector));
+	} >FLASH AT>FLASH
 
 	.text :
 	{
@@ -147,6 +147,7 @@ SECTIONS
     	*(.gnu.linkonce.d.*)
 		. = ALIGN(8);
     	PROVIDE( __global_pointer$ = . + 0x800 );
+    	PROVIDE( __global_pointer = . + 0x800 );
     	*(.sdata .sdata.*)
 		*(.sdata2.*)
     	*(.gnu.linkonce.s.*)
