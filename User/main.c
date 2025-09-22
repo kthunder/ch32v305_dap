@@ -9,7 +9,7 @@ uint32_t buf[0x200 / 4] = { 0 };
 
 void move_fw(uint32_t addr)
 {
-    for (uint32_t i = 0; i <= 0x10000; i += 0x200) {
+    for (uint32_t i = 0; i <= 0x8000; i += 0x200) {
         memcpy(buf, (void *)(addr + i), 0x200);
         IFlash_Prog_512(0x08002000 + i, buf);
         GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
