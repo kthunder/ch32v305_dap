@@ -1,68 +1,14 @@
-#include "dap_main.h"
 #include "debug.h"
-#include "usb2uart.h"
-#include "usbd_core.h"
 
-extern bool flash_start;
-extern uint32_t flash_timer;
-
-void enable_power_output(void)
-{
-    GPIO_InitTypeDef GPIO_InitStructure = { 0 };
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-    GPIO_ResetBits(GPIOA, GPIO_Pin_5);
-    GPIO_ResetBits(GPIOB, GPIO_Pin_12);
-}
-
-void USBHS_RCC_Init(void)
-{
-    RCC_USBCLK48MConfig(RCC_USBCLK48MCLKSource_USBPHY);
-    RCC_USBHSPLLCLKConfig(RCC_HSBHSPLLCLKSource_HSE);
-    RCC_USBHSConfig(RCC_USBPLL_Div3);
-    RCC_USBHSPLLCKREFCLKConfig(RCC_USBHSPLLCKREFCLK_4M);
-    RCC_USBHSPHYPLLALIVEcmd(ENABLE);
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_USBHS, ENABLE);
-}
-
-void usb_dc_low_level_init(void)
-{
-    USBHS_RCC_Init();
-    NVIC_EnableIRQ(USBHS_IRQn);
-}
-uint32_t buf[256 / 4] = { 0 };
 // for bootloader
 void short_press(void)
 {
-    for (uint32_t i = 0; i <= 0x10000; i += 0x100) {
-        memcpy(buf, (void *)(0x08020000 + i), 256);
-        FLASH_ROM_ERASE(0x08002000 + i, 0x100);
-        FLASH_ROM_WRITE(0x08002000 + i, buf, 0x100);
-        GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
-    }
-    NVIC_SystemReset();
+    // NVIC_SystemReset();
 }
 
 void long_press(void)
 {
-    for (uint32_t i = 0; i <= 0x10000; i += 0x100) {
-        memcpy(buf, (void *)(0x08030000 + i), 256);
-        FLASH_ROM_ERASE(0x08002000 + i, 0x100);
-        FLASH_ROM_WRITE(0x08002000 + i, buf, 0x100);
-        GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
-    }
-    NVIC_SystemReset();
+    // NVIC_SystemReset();
 }
 
 #define THRESHOLD 10
@@ -83,11 +29,22 @@ static void key_scan(void)
     }
 }
 
-#define APP_RUN_ADDR (0x08002000)
-extern void msc_ram_init(uint8_t busid, uintptr_t reg_base);
-
-void check_iap_status(void)
+/*********************************************************************
+ * @fn      main
+ *
+ * @brief   Main program.
+ *
+ * @return  none
+ */
+int main(void)
 {
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+    SystemCoreClockUpdate();
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
+
     GPIO_InitTypeDef GPIO_InitStructure = { 0 };
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
@@ -109,16 +66,17 @@ void check_iap_status(void)
 
     while (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == 0)
         ;
-
-    NVIC_EnableIRQ(Software_IRQn);
-    if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0xEF))) {
-        NVIC_SetPendingIRQ(Software_IRQn);
-    } else {
+    // NVIC_EnableIRQ(Software_IRQn);
+    // if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0xEF))) {
+    //     NVIC_SetPendingIRQ(Software_IRQn);
+    // } else {
         // msc_ram_init(0, 0);
         while (1) {
             static uint32_t counter = 0;
-            key_scan();
+
+            // key_scan();
             Delay_Ms(1);
+            // 添加USB连接状态检查
             GPIO_WriteBit(GPIOC, GPIO_Pin_9, counter++ % 1000 > 500);
             // if (flash_start) {
             //     // printf("TIMER %d s\r\n", sys_time_ms());
@@ -127,52 +85,5 @@ void check_iap_status(void)
             //         NVIC_SystemReset();
             // }
         }
-    }
-}
-
-void SW_Handler(void)
-{
-    __asm("li  a6, 0x2000");
-    __asm("jr  a6");
-}
-
-#define APP  0
-#define BOOT 1
-
-#ifndef PROJ
-#define PROJ APP
-#endif
-/*********************************************************************
- * @fn      main
- *
- * @brief   Main program.
- *
- * @return  none
- */
-int main(void)
-{
-    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    SystemCoreClockUpdate();
-    Delay_Init();
-    // USART_Printf_Init(115200);
-    // printf("SystemClk:%d\r\n", SystemCoreClock);
-    // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-#if PROJ == APP
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    enable_power_output();
-
-    uartx_preinit();
-    chry_dap_init(0,0);
-    while (!usb_device_is_configured(0)) {
-    }
-
-    while (1) {
-        chry_dap_handle();
-        chry_dap_usb2uart_handle();
-    }
-#elif PROJ == BOOT
-    void check_iap_status(void);
-    check_iap_status();
-#endif
+    // }
 }

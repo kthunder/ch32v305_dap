@@ -104,7 +104,7 @@ FUNC_ALIAS(Default_Handler, DMA2_Channel9_IRQHandler);
 FUNC_ALIAS(Default_Handler, DMA2_Channel10_IRQHandler);
 FUNC_ALIAS(Default_Handler, DMA2_Channel11_IRQHandler);
 void Reset_Handler();
-
+FUNC_ALIAS(Reset_Handler, _start);
 SECTION_DATA(".vector")
 void (*vector[128])(void) = {
     Reset_Handler,
@@ -226,34 +226,21 @@ static void __memcpy(uint8_t *dist, uint8_t *src, uint32_t len)
 }
 
 SECTION_DATA(".init")
-void Reset_Handler()
+__attribute__((naked)) void Reset_Handler()
 {
-    asm volatile(
-        ".option push\n"
-        ".option norelax\n"
-        "la gp, __global_pointer$\n"
-        ".option pop" : :);
+    asm volatile("la gp, __global_pointer");
     asm volatile("la sp, _eusrstack");
     extern uint8_t _data_vma[], _data_lma[], _edata[], _sbss[], _ebss[];
     __memcpy(_data_vma, _data_lma, _edata - _data_vma);
     __memset(_sbss, 0, _ebss - _sbss);
-    // asm volatile("csrw 0xbc0, %0" : : "r"(0x1f));
-    // asm volatile("csrw 0x804, %0" : : "r"(0x0b));
-    // asm volatile("csrw mstatus, %0" : : "r"(0x6088));
-    // __set_MTVEC((uint32_t)vector);
     /* Configure pipelining and instruction prediction */
-    asm volatile("li t0, 0x1f");
-    asm volatile("csrw 0xbc0, t0");
+    asm volatile("csrw 0xbc0, %0" : : "r"(0x1f));
     /* Enable interrupt nesting and hardware stack */
-    asm volatile("li t0, 0x0b");
-    asm volatile("csrw 0x804, t0");
+    asm volatile("csrw 0x804, %0" : : "r"(0x0b));
     /* Enable floating point and global interrupt, configure privileged mode */
-    asm volatile("li t0, 0x6088");
-    asm volatile("csrw mstatus, t0");
+    __set_MSTATUS(0x6088);
     /* Configure the interrupt vector table recognition mode and entry address mode */
-    asm volatile("la t0, vector");
-    asm volatile("ori t0, t0, 3");
-    asm volatile("csrw mtvec, t0");
+    __set_MTVEC(((uint32_t)vector) | 0b11);
     SystemInit();
     extern int main(void);
     __set_MEPC((uint32_t)main);

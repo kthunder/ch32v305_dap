@@ -14,6 +14,10 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/SRC/Core
     ${CMAKE_SOURCE_DIR}/SRC/Debug
     ${CMAKE_SOURCE_DIR}/SRC/Peripheral/inc
+    # ${CMAKE_SOURCE_DIR}/SRC/tinyusb/hw/bsp
+    # ${CMAKE_SOURCE_DIR}/SRC/tinyusb/hw/bsp/ch32v30x
+    # ${CMAKE_SOURCE_DIR}/SRC/tinyusb/hw/bsp/ch32v30x/boards/nanoch32v305
+    # ${CMAKE_SOURCE_DIR}/SRC/tinyusb/src
     ${CMAKE_SOURCE_DIR}/User
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc
     ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/hid
@@ -26,38 +30,16 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Include
     ${CMAKE_SOURCE_DIR}/DAPHost
 )
-if(PROJ_VALUE STREQUAL "APP")
 file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/SRC/*.c
     # ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
     ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/cdc/usbd_cdc_acm.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/hid/usbd_hid.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/demo/cdc_acm_template.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/CherryRB/chry_ringbuffer.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/DAP/Source/*.c
-    ${CMAKE_SOURCE_DIR}/CherryDAP/dap_main.c
-    ${CMAKE_SOURCE_DIR}/DAPHost/swd_host.c
 )
 list(REMOVE_ITEM SOURCES 
-    ${CMAKE_SOURCE_DIR}/User/msc_ram_template.c
+    # ${CMAKE_SOURCE_DIR}/User/msc_ram_template.c
+    ${CMAKE_SOURCE_DIR}/SRC/tinyusb/*.c
 )
-elseif(PROJ_VALUE STREQUAL "BOOT")
-file(GLOB_RECURSE SOURCES
-    ${CMAKE_SOURCE_DIR}/SRC/*.c
-    # ${CMAKE_SOURCE_DIR}/SRC/Startup/startup_ch32v30x_D8C.S
-    ${CMAKE_SOURCE_DIR}/User/*.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/class/msc/usbd_msc.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/core/usbd_core.c
-    # ${CMAKE_SOURCE_DIR}/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
-)
-list(REMOVE_ITEM SOURCES 
-    ${CMAKE_SOURCE_DIR}/User/usb2uart.c
-)
-endif()
+
 target_sources(app INTERFACE
     ${SOURCES}
 )
