@@ -1,14 +1,30 @@
 #include "debug.h"
-
+#include "ch32v30x_usbhs_device.h"
+#include "debug.h"
+#include "Internal_Flash.h"
+// #include "SPI_FLASH.h"
+#include "SW_UDISK.h"
 // for bootloader
+uint32_t buf[0x200 / 4] = { 0 };
+
+void move_fw(uint32_t addr)
+{
+    for (uint32_t i = 0; i <= 0x10000; i += 0x200) {
+        memcpy(buf, (void *)(addr + i), 0x200);
+        IFlash_Prog_512(0x08002000 + i, buf);
+        GPIO_WriteBit(GPIOC, GPIO_Pin_9, (i % 0x1000) > 0x800);
+    }
+    NVIC_SetPendingIRQ(Software_IRQn);
+}
+
 void short_press(void)
 {
-    // NVIC_SystemReset();
+    move_fw(0x08020000);
 }
 
 void long_press(void)
 {
-    // NVIC_SystemReset();
+    move_fw(0x08030000);
 }
 
 #define THRESHOLD 10
@@ -36,6 +52,7 @@ static void key_scan(void)
  *
  * @return  none
  */
+GPIO_InitTypeDef GPIO_InitStructure = { 0 };
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -44,9 +61,6 @@ int main(void)
     // USART_Printf_Init(115200);
     // printf("SystemClk:%d\r\n", SystemCoreClock);
     // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-
-    GPIO_InitTypeDef GPIO_InitStructure = { 0 };
-
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
@@ -66,24 +80,31 @@ int main(void)
 
     while (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_7) == 0)
         ;
-    // NVIC_EnableIRQ(Software_IRQn);
-    // if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0xEF))) {
-    //     NVIC_SetPendingIRQ(Software_IRQn);
-    // } else {
-        // msc_ram_init(0, 0);
+
+    /* Enable Udisk */
+    Udisk_Capability = IFLASH_UDISK_SIZE  / DEF_UDISK_SECTOR_SIZE;
+    Udisk_Status |= DEF_UDISK_EN_FLAG;
+
+#define APP_RUN_ADDR (0x08002000)
+    NVIC_EnableIRQ(Software_IRQn);
+    if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0x97))) {
+        NVIC_SetPendingIRQ(Software_IRQn);
+    } else {
+        USBHS_RCC_Init( );
+        USBHS_Device_Init( ENABLE );
         while (1) {
             static uint32_t counter = 0;
-
-            // key_scan();
+            key_scan();
             Delay_Ms(1);
-            // 添加USB连接状态检查
             GPIO_WriteBit(GPIOC, GPIO_Pin_9, counter++ % 1000 > 500);
-            // if (flash_start) {
-            //     // printf("TIMER %d s\r\n", sys_time_ms());
-            //     // printf("flash_timer %d s\r\n", flash_timer);
-            //     if (sys_time_ms() - flash_timer > 3000)
-            //         NVIC_SystemReset();
-            // }
+            extern bool flash_start;
+            extern uint32_t flash_timer;
+            if (flash_start) {
+                // printf("TIMER %d s\r\n", sys_time_ms());
+                // printf("flash_timer %d s\r\n", flash_timer);
+                if (sys_time_ms() - flash_timer > 3000)
+                    NVIC_SystemReset();
+            }
         }
-    // }
+    }
 }

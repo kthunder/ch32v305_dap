@@ -238,11 +238,11 @@ __attribute__((naked)) void Reset_Handler()
     /* Enable interrupt nesting and hardware stack */
     asm volatile("csrw 0x804, %0" : : "r"(0x0b));
     /* Enable floating point and global interrupt, configure privileged mode */
-    __set_MSTATUS(0x6088);
+    asm volatile("csrw mstatus, %0" : : "r"(0x6088));
     /* Configure the interrupt vector table recognition mode and entry address mode */
-    __set_MTVEC(((uint32_t)vector) | 0b11);
+    asm volatile("csrw mtvec, %0" : : "r"(((uint32_t)vector) | 0b11));
     SystemInit();
     extern int main(void);
-    __set_MEPC((uint32_t)main);
+    asm volatile("csrw mepc, %0" : : "r"((uint32_t)main));
     asm volatile("mret");
 }
