@@ -330,10 +330,11 @@ of the same I/O port. The following SWDIO I/O Pin functions are provided:
 // 0b1000上下拉输入
 // 0b0011推挽输出
 // clang-format off
-#define NOPx1() __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
-#define NOPx3() NOPx1();NOPx1();
+#define NOPx1() __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
+#define NOPx3() NOPx1();NOPx1();NOPx1();
 
-#define iPIN_TMS_INPUT_ENABLE()      PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b1000<<((13-8)*4));PORT_DIO->BSHR=PIN_DIO;NOPx3();
+
+#define iPIN_TMS_INPUT_ENABLE()      PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b1000<<((13-8)*4));NOPx3();
 #define iPIN_TMS_INPUT_DISABLE()     PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b0011<<((13-8)*4));NOPx3();
 // #define iPIN_TMSC_OUT_SIDE_SET(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<< 0)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
 // #define iPIN_TMSC_OUT_SIDE_CLR(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<<16)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
