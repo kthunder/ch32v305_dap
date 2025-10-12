@@ -237,8 +237,8 @@ __attribute__((naked)) void Reset_Handler()
     asm volatile("csrw 0xbc0, %0" : : "r"(0x1f));
     /* Enable interrupt nesting and hardware stack */
     asm volatile("csrw 0x804, %0" : : "r"(0x0b));
-    /* Enable floating point and global interrupt, configure privileged mode */
-    asm volatile("csrw mstatus, %0" : : "r"(0x6088));
+    /* Enable floating point and global interrupt, configure privileged mode : Machine Mode */
+    asm volatile("csrw mstatus, %0" : : "r"(0x7888));
     /* Configure the interrupt vector table recognition mode and entry address mode */
     asm volatile("csrw mtvec, %0" : : "r"(((uint32_t)vector) | 0b11));
     SystemInit();

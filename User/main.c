@@ -86,9 +86,8 @@ int main(void)
     Udisk_Status |= DEF_UDISK_EN_FLAG;
 
 #define APP_RUN_ADDR (0x08002000)
-    NVIC_EnableIRQ(Software_IRQn);
     if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0x97))) {
-        NVIC_SetPendingIRQ(Software_IRQn);
+        ((int (*)(void))APP_RUN_ADDR)();
     } else {
         USBHS_RCC_Init( );
         USBHS_Device_Init( ENABLE );
