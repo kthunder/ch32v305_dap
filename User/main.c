@@ -87,7 +87,7 @@ int main(void)
 
 #define APP_RUN_ADDR (0x08002000)
     if (io_status && ((*(uint8_t *)APP_RUN_ADDR == 0x6F) || (*(uint8_t *)APP_RUN_ADDR == 0x97))) {
-        ((int (*)(void))APP_RUN_ADDR)();
+        ((int (*)(void))0x2000)();
     } else {
         USBHS_RCC_Init( );
         USBHS_Device_Init( ENABLE );
