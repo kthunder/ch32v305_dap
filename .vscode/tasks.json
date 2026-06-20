@@ -5,11 +5,13 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Download",
-            "command": "wlink",
+            "label": "Download (OpenOCD)",
+            "command": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
             "args": [
-                "flash",
-                "./build/${workspaceFolderBasename}.elf"
+                "-f",
+                "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+                "-c",
+                "program ./build/ch32v305_dap.elf reset exit"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -22,7 +24,7 @@
         {
             "type": "shell",
             "label": "Build",
-            "command": "cmake --build ./build --target all --",
+            "command": "cmake -S . -B build -G Ninja ; cmake --build build -j12",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
