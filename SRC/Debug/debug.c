@@ -112,12 +112,13 @@ uint32_t div64_32(uint64_t dividend, uint32_t divisor)
 
 uint32_t sys_time_ms()
 {
-    return div64_32(SysTick->CNT, p_ms);
+    return ((uint32_t)SysTick->CNT)/p_ms;
 };
 
 uint32_t sys_time_us()
 {
-    return div64_32(SysTick->CNT, p_us);
+    // return div64_32(SysTick->CNT, p_us);
+    return ((uint32_t)SysTick->CNT)/p_us;
 };
 
 /*********************************************************************

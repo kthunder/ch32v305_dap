@@ -106,7 +106,7 @@ FUNC_ALIAS(Default_Handler, DMA2_Channel11_IRQHandler);
 void Reset_Handler();
 FUNC_ALIAS(Reset_Handler, _start);
 SECTION_DATA(".vector")
-void (*vector[128])(void) = {
+void (*vector[])(void) = {
     Reset_Handler,
     0,
     NMI_Handler,       /* NMI */
@@ -194,24 +194,24 @@ void (*vector[128])(void) = {
     USBFS_IRQHandler,          /* USBFS */
     USBHSWakeup_IRQHandler,    /* USBHS Wakeup */
     USBHS_IRQHandler,          /* USBHS */
-    DVP_IRQHandler,            /* DVP */
-    UART6_IRQHandler,          /* UART6 */
-    UART7_IRQHandler,          /* UART7 */
-    UART8_IRQHandler,          /* UART8 */
-    TIM9_BRK_IRQHandler,       /* TIM9 Break */
-    TIM9_UP_IRQHandler,        /* TIM9 Update */
-    TIM9_TRG_COM_IRQHandler,   /* TIM9 Trigger and Commutation */
-    TIM9_CC_IRQHandler,        /* TIM9 Capture Compare */
-    TIM10_BRK_IRQHandler,      /* TIM10 Break */
-    TIM10_UP_IRQHandler,       /* TIM10 Update */
-    TIM10_TRG_COM_IRQHandler,  /* TIM10 Trigger and Commutation */
-    TIM10_CC_IRQHandler,       /* TIM10 Capture Compare */
-    DMA2_Channel6_IRQHandler,  /* DMA2 Channel 6 */
-    DMA2_Channel7_IRQHandler,  /* DMA2 Channel 7 */
-    DMA2_Channel8_IRQHandler,  /* DMA2 Channel 8 */
-    DMA2_Channel9_IRQHandler,  /* DMA2 Channel 9 */
-    DMA2_Channel10_IRQHandler, /* DMA2 Channel 10 */
-    DMA2_Channel11_IRQHandler, /* DMA2 Channel 11 */
+    // DVP_IRQHandler,            /* DVP */
+    // UART6_IRQHandler,          /* UART6 */
+    // UART7_IRQHandler,          /* UART7 */
+    // UART8_IRQHandler,          /* UART8 */
+    // TIM9_BRK_IRQHandler,       /* TIM9 Break */
+    // TIM9_UP_IRQHandler,        /* TIM9 Update */
+    // TIM9_TRG_COM_IRQHandler,   /* TIM9 Trigger and Commutation */
+    // TIM9_CC_IRQHandler,        /* TIM9 Capture Compare */
+    // TIM10_BRK_IRQHandler,      /* TIM10 Break */
+    // TIM10_UP_IRQHandler,       /* TIM10 Update */
+    // TIM10_TRG_COM_IRQHandler,  /* TIM10 Trigger and Commutation */
+    // TIM10_CC_IRQHandler,       /* TIM10 Capture Compare */
+    // DMA2_Channel6_IRQHandler,  /* DMA2 Channel 6 */
+    // DMA2_Channel7_IRQHandler,  /* DMA2 Channel 7 */
+    // DMA2_Channel8_IRQHandler,  /* DMA2 Channel 8 */
+    // DMA2_Channel9_IRQHandler,  /* DMA2 Channel 9 */
+    // DMA2_Channel10_IRQHandler, /* DMA2 Channel 10 */
+    // DMA2_Channel11_IRQHandler, /* DMA2 Channel 11 */
 };
 
 static void __memset(uint8_t *dist, uint8_t val, uint32_t len)
@@ -237,8 +237,8 @@ __attribute__((naked)) void Reset_Handler()
     asm volatile("csrw 0xbc0, %0" : : "r"(0x1f));
     /* Enable interrupt nesting and hardware stack */
     asm volatile("csrw 0x804, %0" : : "r"(0x0b));
-    /* Enable floating point and global interrupt, configure privileged mode */
-    asm volatile("csrw mstatus, %0" : : "r"(0x6088));
+    /* Enable floating point and global interrupt, configure privileged mode : Machine Mode */
+    asm volatile("csrw mstatus, %0" : : "r"(0x7888));
     /* Configure the interrupt vector table recognition mode and entry address mode */
     asm volatile("csrw mtvec, %0" : : "r"(((uint32_t)vector) | 0b11));
     SystemInit();

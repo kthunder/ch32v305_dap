@@ -7,7 +7,7 @@
 #define CHERRYUSB_CONFIG_H
 
 /* ================ USB common Configuration ================ */
-#define CONFIG_USBDEV_ADVANCE_DESC
+// #define CONFIG_USBDEV_ADVANCE_DESC
 
 // #define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
 #define CONFIG_USB_PRINTF(...)
@@ -15,6 +15,9 @@
 #ifndef CONFIG_USB_DBG_LEVEL
 #define CONFIG_USB_DBG_LEVEL USB_DBG_INFO
 #endif
+
+/* Use system memcpy to avoid duplicate usb_memcpy copies */
+#define CONFIG_USB_MEMCPY_DISABLE
 
 /* Enable print with color */
 #define CONFIG_USB_PRINTF_COLOR_ENABLE
@@ -33,6 +36,7 @@
 /* Ep0 in and out transfer buffer */
 #ifndef CONFIG_USBDEV_REQUEST_BUFFER_LEN
 #define CONFIG_USBDEV_REQUEST_BUFFER_LEN 512
+#define USBD_DFU_XFER_SIZE CONFIG_USBDEV_REQUEST_BUFFER_LEN
 #endif
 
 /* Setup packet log for debug */

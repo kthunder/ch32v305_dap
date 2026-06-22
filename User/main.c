@@ -58,23 +58,96 @@ void usb_dc_low_level_init(void)
 // #define IO_CLR10000() IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();
 int main(void)
 {
+    // if ((BKP->DATAR42 != 0x5AFE)&&(*(uint16_t *)0x2002 == 0x1FFF)) {
+    //     ((int (*)(void))0x2000)();
+    // }
+
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SystemCoreClockUpdate();
-    Delay_Init();
-    // USART_Printf_Init(115200);
-    // printf("SystemClk:%d\r\n", SystemCoreClock);
-    // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID());
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    enable_power_output();
 
-    uartx_preinit();
-    chry_dap_init(0,0);
-    while (!usb_device_is_configured(0)) {
-    }
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP | RCC_APB1Periph_PWR, ENABLE);
+    PWR_BackupAccessCmd(ENABLE);
+    // ((int (*)(void))0x2000)();
+ 
+// #define APP_RUN_ADDR (0x08002000)
+    // if (BKP->DATAR42 == 0x5AFE) {
+    //     // if (*(uint16_t *)0x2002 == 0x2000) {
+    //         ((int (*)(void))0x2000)();
+    //     // }
+    // }
+    BKP->DATAR42 = 0x5AFE;
+    // BKP->DATAR42 = 0x999;
 
-    while (1) {
-        chry_dap_handle();
-        chry_dap_usb2uart_handle();
+    Delay_Init();  
+    USART_Printf_Init(115200); 
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID()) ; 
+    printf("ChipID:%08x\r\n", *(uint16_t *)0x2002) ; 
+
+    NVIC_SystemReset();
+
+    // extern void dfu_flash_init(uint8_t busid, uintptr_t reg_base);
+	// dfu_flash_init(0, 0);
+
+    while (1) {  
+    
     }
+    // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    // enable_power_output();
+
+    // uartx_preinit();
+    // chry_dap_init(0,0);
+    // while (!usb_device_is_configured(0)) {
+    // }
+
+    // while (1) {
+    //     chry_dap_handle();
+    //     chry_dap_usb2uart_handle();
+    // }
+}
+
+uint8_t *dfu_read_flash(uint8_t *src, uint8_t *dest, uint32_t len)
+{
+  uint32_t i = 0;
+  uint8_t *psrc = src;
+
+  for (i = 0; i < len; i++)
+  {
+    dest[i] = *psrc++;
+  }
+  /* Return a valid address to avoid HardFault */
+  return (uint8_t *)(dest);
+}
+
+uint16_t dfu_write_flash(uint8_t *src, uint8_t *dest, uint32_t len)
+{
+  uint32_t addr = (uint32_t)dest;
+  uint32_t i;
+
+  addr &= 0x00FFFFFF;
+  addr |= 0x08000000;
+  FLASH_Unlock_Fast();
+  for (i = 0; i < len; i += 256)
+  {
+    FLASH_ErasePage_Fast(addr);
+    FLASH_ProgramPage_Fast(addr + i, (uint32_t *)(src + i));
+  }
+//   FLASH_Lock_Fast();
+  return 0;
+}
+
+uint16_t dfu_erase_flash(uint32_t add)
+{
+    // add &= 0x00FFFFFF;
+    // add |= 0x08000000;
+    // FLASH_Unlock_Fast();
+    // FLASH_ErasePage_Fast(add);
+    // FLASH_Lock_Fast();
+    return 0;
+}
+
+void dfu_leave(void)
+{
+    NVIC_SystemReset();
 }

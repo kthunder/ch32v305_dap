@@ -21,6 +21,7 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/cdc
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/hid
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/msc
+    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/dfu
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/common
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/core
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/port/ch32/ch32hs
@@ -36,6 +37,7 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/cdc/usbd_cdc_acm.c
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/hid/usbd_hid.c
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/msc/usbd_msc.c
+    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/dfu/usbd_dfu.c
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/core/usbd_core.c
     ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/port/ch32/usb_dc_usbhs.c
     ${CMAKE_SOURCE_DIR}/Cherry/CherryRB/chry_ringbuffer.c

@@ -39,6 +39,8 @@ SECTIONS
 		_sinit = .;
 		. = ALIGN(4);
 		KEEP(*(SORT_NONE(.init)))
+		*(.text.dfu_notify_handler)
+		*(.text.NVIC_PriorityGroupConfig)
 		. = ALIGN(4);
 		_einit = .;
 	} >FLASH AT>FLASH
