@@ -33,32 +33,24 @@ MEMORY
 
 SECTIONS
 {
-
-	.init :
-	{
-		_sinit = .;
-		. = ALIGN(4);
-		KEEP(*(SORT_NONE(.init)))
-		*(.text.dfu_notify_handler)
-		*(.text.NVIC_PriorityGroupConfig)
-		. = ALIGN(4);
-		_einit = .;
-	} >FLASH AT>FLASH
-
 	.vector :
 	{
 		. = ALIGN(64);
 		KEEP(*(.vector));
 	} >FLASH AT>FLASH
 
+	.init :
+	{
+		_sinit = .;
+		. = ALIGN(4);
+		KEEP(*(SORT_NONE(.init)))
+		. = ALIGN(4);
+		_einit = .;
+	} >FLASH AT>FLASH
+
 	.text :
 	{
 		. = ALIGN(4);
-		/* *(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .text)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .text.*)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .rodata)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .rodata*)
-		*(EXCLUDE_FILE(*CherryUSB* *User* *gpio* *rcc*) .gnu.linkonce.t.*) */
 		*(.text)
 		*(.text.*)
 		*(.rodata)

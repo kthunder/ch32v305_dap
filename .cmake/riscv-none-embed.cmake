@@ -62,5 +62,5 @@ add_link_options(
     -Wl,--print-memory-usage
     --specs=nano.specs --specs=nosys.specs
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections
-    -T ${CMAKE_SOURCE_DIR}/SRC/Ld/Link.ld
+    -T ${CMAKE_SOURCE_DIR}/ch32v305_flash.ld
 )

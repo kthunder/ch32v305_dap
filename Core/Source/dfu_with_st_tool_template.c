@@ -248,18 +248,6 @@ static void usbd_event_handler(uint8_t busid, uint8_t event)
 
 struct usbd_interface intf0;
 
-static const uint8_t bos_descriptor[] = {
-    0x05,                              /* bLength */
-    USB_DESCRIPTOR_TYPE_BINARY_OBJECT_STORE, /* bDescriptorType */
-    0x05, 0x00,                        /* wTotalLength */
-    0x00                               /* bNumDeviceCaps */
-};
-
-static struct usb_bos_descriptor bos_desc = {
-    .string = bos_descriptor,
-    .string_len = sizeof(bos_descriptor),
-};
-
 void dfu_flash_init(uint8_t busid, uintptr_t reg_base)
 {
 #ifdef CONFIG_USBDEV_ADVANCE_DESC

@@ -11,45 +11,47 @@ target_compile_definitions(app INTERFACE
 )
 
 target_include_directories(app INTERFACE
-    ${CMAKE_SOURCE_DIR}/SRC/Core
-    ${CMAKE_SOURCE_DIR}/SRC/Debug
-    ${CMAKE_SOURCE_DIR}/SRC/Peripheral/inc
-    ${CMAKE_SOURCE_DIR}/User
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP
-    # ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/DAP/Include
-    ${CMAKE_SOURCE_DIR}/Cherry/porting
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/cdc
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/hid
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/msc
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/dfu
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/common
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/core
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/port/ch32/ch32hs
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryRB
-    ${CMAKE_SOURCE_DIR}/DAPHost
+    ${CMAKE_SOURCE_DIR}/Core/Include
+    ${CMAKE_SOURCE_DIR}/Libraries/CH32V305_STD_Driver/Core
+    ${CMAKE_SOURCE_DIR}/Libraries/CH32V305_STD_Driver/Debug
+    ${CMAKE_SOURCE_DIR}/Libraries/CH32V305_STD_Driver/Peripheral/inc
+
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP
+    # ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Include
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/cdc
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/hid
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/msc
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/dfu
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/common
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/core
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/port/ch32/ch32hs
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryRB
+    ${CMAKE_SOURCE_DIR}/Middlewares/DAPHost
+    ${CMAKE_SOURCE_DIR}/Middlewares/port
 )
 
 file(GLOB_RECURSE SOURCES
-    ${CMAKE_SOURCE_DIR}/SRC/*.c
-    ${CMAKE_SOURCE_DIR}/User/*.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/DAP/Source/*.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/dap_main.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/cdc/usbd_cdc_acm.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/hid/usbd_hid.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/msc/usbd_msc.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/class/dfu/usbd_dfu.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/core/usbd_core.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/port/ch32/usb_dc_usbhs.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryRB/chry_ringbuffer.c
-    ${CMAKE_SOURCE_DIR}/DAPHost/swd_host.c
-    ${CMAKE_SOURCE_DIR}/Cherry/porting/*.c
+    ${CMAKE_SOURCE_DIR}/Core/*.c
+    ${CMAKE_SOURCE_DIR}/Libraries/CH32V305_STD_Driver/*.c
+
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/*.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/dap_main.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/cdc/usbd_cdc_acm.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/hid/usbd_hid.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/msc/usbd_msc.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/class/dfu/usbd_dfu.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/core/usbd_core.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryRB/chry_ringbuffer.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/DAPHost/swd_host.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/port/*.c
 )
 list(REMOVE_ITEM SOURCES 
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/dap_main.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/DAP/Source/DAP_vendor.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/DAP/Source/DAP.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryDAP/DAP/Source/JTAG_DP.c
-    ${CMAKE_SOURCE_DIR}/Cherry/CherryUSB/port/ch32/ch32hs/usb_dc_usbhs.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/dap_main.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/DAP_vendor.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/DAP.c
+    ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/JTAG_DP.c
+    # ${CMAKE_SOURCE_DIR}/Middlewares/CherryUSB/port/ch32/usb_dc_usbhs.c
 )
 
 target_sources(app INTERFACE
@@ -67,7 +69,7 @@ if(CMAKE_C_STANDARD LESS 11)
     message(ERROR "Generated code requires C11 or higher")
 endif()
 
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/User/main.c")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/Core/Source/main.c")
 
 # ###################### USER ADD LINES ##############################
 

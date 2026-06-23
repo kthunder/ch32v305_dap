@@ -7,7 +7,7 @@
 #define CHERRYUSB_CONFIG_H
 
 /* ================ USB common Configuration ================ */
-// #define CONFIG_USBDEV_ADVANCE_DESC
+#define CONFIG_USBDEV_ADVANCE_DESC
 
 // #define CONFIG_USB_PRINTF(...) printf(__VA_ARGS__)
 #define CONFIG_USB_PRINTF(...)

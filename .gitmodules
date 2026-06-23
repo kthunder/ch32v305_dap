@@ -1,9 +1,3 @@
-[submodule "Cherry/CherryUSB"]
-	path = Cherry/CherryUSB
-	url = https://github.com/cherry-embedded/CherryUSB.git
-[submodule "Cherry/CherryRB"]
-	path = Cherry/CherryRB
-	url = https://github.com/cherry-embedded/CherryRB.git
-[submodule "Cherry/CherryDAP"]
-	path = Cherry/CherryDAP
+[submodule "Middlewares/CherryDAP"]
+	path = Middlewares/CherryDAP
 	url = https://github.com/cherry-embedded/CherryDAP.git

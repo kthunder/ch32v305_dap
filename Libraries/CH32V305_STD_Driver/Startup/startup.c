@@ -105,9 +105,23 @@ FUNC_ALIAS(Default_Handler, DMA2_Channel10_IRQHandler);
 FUNC_ALIAS(Default_Handler, DMA2_Channel11_IRQHandler);
 void Reset_Handler();
 FUNC_ALIAS(Reset_Handler, _start);
+
+#define RISCV_JAL(rd, offset) \
+    ( \
+        ((((uint32_t)(offset) >> 20) & 0x1) << 31) | \
+        ((((uint32_t)(offset) >>  1) & 0x3ff) << 21) | \
+        ((((uint32_t)(offset) >> 11) & 0x1) << 20) | \
+        ((((uint32_t)(offset) >> 12) & 0xff) << 12) | \
+        (((rd) & 0x1f) << 7) | \
+        0x6f \
+    )
+
+#define RISCV_JUMP(target, pc) \
+    RISCV_JAL(0, (int32_t)((target) - (pc)))
+
 SECTION_DATA(".vector")
 void (*vector[])(void) = {
-    Reset_Handler,
+    (void*)RISCV_JUMP(0x2158, 0),
     0,
     NMI_Handler,       /* NMI */
     HardFault_Handler, /* Hard Fault */
