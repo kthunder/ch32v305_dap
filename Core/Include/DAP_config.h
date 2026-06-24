@@ -330,12 +330,20 @@ of the same I/O port. The following SWDIO I/O Pin functions are provided:
 // 0b1000上下拉输入
 // 0b0011推挽输出
 // clang-format off
-#define NOPx1() __NOP();__NOP();__NOP();__NOP();__NOP();__NOP();
-#define NOPx3() NOPx1();NOPx1();NOPx1();
+__STATIC_FORCEINLINE void PIN_DELAY_SLOWX (uint32_t delay) {
+  __asm volatile (
+    "1: addi %0, %0, -1 \n"
+    "   bnez %0, 1b      \n"
+    : "+r" (delay)
+    :
+    : "cc"
+  );
+}
 
+#define iPIN_DELAY() PIN_DELAY_SLOWX(DAP_Data.clock_delay);
 
-#define iPIN_TMS_INPUT_ENABLE()      PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b1000<<((13-8)*4));NOPx3();
-#define iPIN_TMS_INPUT_DISABLE()     PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b0011<<((13-8)*4));NOPx3();
+#define iPIN_TMS_INPUT_ENABLE()      PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b1000<<((13-8)*4));__NOP();__NOP();__NOP();
+#define iPIN_TMS_INPUT_DISABLE()     PORT_DIO->CFGHR&=(~(0xF<<((13-8)*4)));PORT_DIO->CFGHR|=(0b0011<<((13-8)*4));__NOP();__NOP();__NOP();
 // #define iPIN_TMSC_OUT_SIDE_SET(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<< 0)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
 // #define iPIN_TMSC_OUT_SIDE_CLR(bit)  cJTAG_TMSC_PIN_PORT->BSRR = (cJTAG_TCKC_PIN<<16)|(cJTAG_TMSC_PIN << (bit?0:16));NOP()
 
@@ -344,12 +352,12 @@ of the same I/O port. The following SWDIO I/O Pin functions are provided:
 #define iGPIO_SET(port, pin)        port->BSHR = pin
 #define iGPIO_CLR(port, pin)        port->BCR = pin
 
-#define iPIN_TCK_SET()  iGPIO_SET(PORT_CLK, PIN_CLK);NOPx3();
-#define iPIN_TCK_CLR()  iGPIO_CLR(PORT_CLK, PIN_CLK);NOPx3();
-#define iPIN_TMS_SET()  iGPIO_SET(PORT_DIO, PIN_DIO);NOPx3();
-#define iPIN_TMS_CLR()  iGPIO_CLR(PORT_DIO, PIN_DIO);NOPx3();
-#define iPIN_TMS_OUT(x) iGPIO_PUT(PORT_DIO, PIN_DIO, (x&1));NOPx3();
-#define iPIN_TDO_GET()  iGPIO_GET(PORT_DIO, PIN_DIO);NOPx3();
+#define iPIN_TCK_SET()  iGPIO_SET(PORT_CLK, PIN_CLK);iPIN_DELAY();
+#define iPIN_TCK_CLR()  iGPIO_CLR(PORT_CLK, PIN_CLK);iPIN_DELAY();
+#define iPIN_TMS_SET()  iGPIO_SET(PORT_DIO, PIN_DIO);iPIN_DELAY();
+#define iPIN_TMS_CLR()  iGPIO_CLR(PORT_DIO, PIN_DIO);iPIN_DELAY();
+#define iPIN_TMS_OUT(x) iGPIO_PUT(PORT_DIO, PIN_DIO, (x&1));iPIN_DELAY();
+#define iPIN_TDO_GET()  iGPIO_GET(PORT_DIO, PIN_DIO);iPIN_DELAY();
 
 #define JTAG_CYCLE_TCK_FAST(tms, tdi, tdo) \
     do                                     \

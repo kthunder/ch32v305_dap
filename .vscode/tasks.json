@@ -17,9 +17,7 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [],
-            "dependsOn": [
-                "Build"
-            ]
+            "dependsOn": ["Build"]
         },
         {
             "type": "shell",
@@ -35,9 +33,7 @@
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [],
-            "dependsOn": [
-                "Build"
-            ]
+            "dependsOn": ["Build"]
         },
         {
             "type": "shell",
@@ -48,6 +44,16 @@
             },
             "problemMatcher": [],
             "hide": false
+        },
+        {
+            "type": "shell",
+            "label": "dfu update App",
+            "command": "python ./usb_manager.py ; Start-Sleep -Seconds 1 ; dfu-util -S '2022123456' -a 0 -s 0x08002000:leave -D ./build/ch32v305_dap.bin",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "dependsOn": ["Build"]
         }
     ]
 }

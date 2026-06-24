@@ -24,6 +24,7 @@ void usb_dc_low_level_init(void)
  *
  * @return  none
  */
+#define DEBUG_BOOT 0
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
@@ -37,6 +38,12 @@ int main(void)
     RCC->APB1PCENR |= RCC_APB1Periph_BKP | RCC_APB1Periph_PWR;
     PWR->CTLR |= (1 << 8);
 
+#if DEBUG_BOOT == 1
+    Delay_Init();
+    USART_Printf_Init(115200);
+    printf("SystemClk:%d\r\n", SystemCoreClock);
+    printf("ChipID1:%08x\r\n", DBGMCU_GetCHIPID()) ;
+#endif
     FLASH_Unlock_Fast();
     extern void dfu_flash_init(uint8_t busid, uintptr_t reg_base);
 	  dfu_flash_init(0, 0);
@@ -45,6 +52,9 @@ int main(void)
 
 uint8_t *dfu_read_flash(uint8_t *src, uint8_t *dest, uint32_t len)
 {
+#if DEBUG_BOOT == 1
+  printf("read_flash:%08X, %08X, %d\r\n", (uint32_t)src, (uint32_t)dest, len);
+#endif
   memcpy(dest, src, len);
   /* Return a valid address to avoid HardFault */
   return (uint8_t *)(dest);
@@ -52,6 +62,9 @@ uint8_t *dfu_read_flash(uint8_t *src, uint8_t *dest, uint32_t len)
 
 uint16_t dfu_write_flash(uint8_t *src, uint8_t *dest, uint32_t len)
 {
+#if DEBUG_BOOT == 1
+  printf("write_flash:%08X, %08X, %d\r\n", (uint32_t)src, (uint32_t)dest, len);
+#endif
   uint32_t addr = (uint32_t)dest;
   uint32_t i;
 
@@ -68,7 +81,13 @@ uint16_t dfu_write_flash(uint8_t *src, uint8_t *dest, uint32_t len)
 
 uint16_t dfu_erase_flash(uint32_t addr)
 {
-  FLASH_ErasePage_Fast(addr);
+#if DEBUG_BOOT == 1
+  printf("erase_flash:%08X\r\n", (uint32_t)addr);
+#endif
+  for (uint32_t i = 0; i < 8 * 1024; i += 256)
+  {
+    FLASH_ErasePage_Fast(addr + i);
+  }
   return 0;
 }
 void dfu_leave(void){BKP->DATAR42 = 0x5AFD;NVIC_SystemReset();}

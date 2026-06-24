@@ -48,24 +48,15 @@ void usb_dc_low_level_init(void)
  *
  * @return  none
  */
-// #define IO_CLR() GPIOB->BCR = PIN_TDI;__NOP();__NOP();__NOP();GPIOB->BSHR = PIN_TDI;__NOP();__NOP();__NOP();
-// // #define IO_CLR() __NOP();
-// #define IO_CLR5() IO_CLR();IO_CLR();IO_CLR();IO_CLR();IO_CLR();
-// #define IO_CLR25() IO_CLR5();IO_CLR5();IO_CLR5();IO_CLR5();IO_CLR5();
-// #define IO_CLR100() IO_CLR25();IO_CLR25();IO_CLR25();IO_CLR25();
-// #define IO_CLR500() IO_CLR100();IO_CLR100();IO_CLR100();IO_CLR100();IO_CLR100();
-// #define IO_CLR1000() IO_CLR500();IO_CLR500();
-// #define IO_CLR10000() IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();IO_CLR1000();
 int main(void)
 {
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     SystemCoreClockUpdate();
 
-    Delay_Init();  
-    USART_Printf_Init(115200); 
-    printf("SystemClk:%d\r\n", SystemCoreClock);
-    printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID()) ; 
-    printf("ChipID:%08x\r\n", *(uint16_t *)0x2002) ; 
+    // Delay_Init();
+    // USART_Printf_Init(115200);
+    // printf("SystemClk:%d\r\n", SystemCoreClock);
+    // printf("ChipID:%08x\r\n", DBGMCU_GetCHIPID()) ;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP | RCC_APB1Periph_PWR, ENABLE);
     PWR_BackupAccessCmd(ENABLE);
@@ -73,9 +64,9 @@ int main(void)
     BKP->DATAR42 = 0x5AFF;
     // NVIC_SystemReset();
 
-    // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-    // GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-    // enable_power_output();
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+    enable_power_output();
 
     uartx_preinit();
     chry_dap_init(0,0);
