@@ -5,13 +5,31 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "Download (OpenOCD)",
+            "label": "OpenOCD download app",
             "command": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
             "args": [
                 "-f",
                 "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
                 "-c",
                 "program ./build/ch32v305_dap.elf reset exit"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "dependsOn": [
+                "Build"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "OpenOCD download boot",
+            "command": "C:/APP/xpack-dev-tools/WchOpenOCD/bin/openocd",
+            "args": [
+                "-f",
+                "C:/APP/xpack-dev-tools/WchOpenOCD/bin/wch-riscv.cfg",
+                "-c",
+                "program ./build/ch32v305_dap_boot.elf reset exit"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

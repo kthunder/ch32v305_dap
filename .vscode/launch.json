@@ -7,12 +7,12 @@
         {
             "name": "launch",
             "cwd": "${workspaceFolder}",
-            "executable": "./build/${workspaceFolderBasename}.elf",
+            "executable": "./build/${workspaceFolderBasename}_boot.elf",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            "gdbPath": "riscv-wch-elf-gdb",
+            "gdbPath": "C:/APP/xpack-dev-tools/RISC-VEmbeddedGCC12/bin/riscv-wch-elf-gdb",
             "osx": {
                 "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
                 "configFiles": [
@@ -31,12 +31,12 @@
         {
             "name": "attach",
             "cwd": "${workspaceFolder}",
-            "executable": "./build/${workspaceFolderBasename}.elf",
+            "executable": "./build/${workspaceFolderBasename}_boot.elf",
             "request": "attach",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "openocd",
-            "gdbPath": "riscv-wch-elf-gdb",
+            "gdbPath": "C:/APP/xpack-dev-tools/RISC-VEmbeddedGCC12/bin/riscv-wch-elf-gdb",
             "osx": {
                 "serverpath": "/Users/konglei/ENV/OpenOCD/OpenOCD/bin/wch_openocd",
                 "configFiles": [

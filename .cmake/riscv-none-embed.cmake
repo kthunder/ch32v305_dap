@@ -8,14 +8,14 @@ set(CMAKE_CXX_COMPILER_ID GNU)
 
 # Some default GCC settings
 # arm-none-eabi- must be part of path environment
-set(TOOLCHAIN_PREFIX                "riscv-wch-elf-")
+set(TOOLCHAIN_PREFIX                "C:/APP/xpack-dev-tools/RISC-VEmbeddedGCC12/bin/riscv-wch-elf-")
 
-set(CMAKE_C_COMPILER                ${TOOLCHAIN_PREFIX}gcc)
-set(CMAKE_ASM_COMPILER              ${TOOLCHAIN_PREFIX}gcc)
-set(CMAKE_CXX_COMPILER              ${TOOLCHAIN_PREFIX}g++)
-set(CMAKE_OBJCOPY                   ${TOOLCHAIN_PREFIX}objcopy)
-set(CMAKE_OBJDUMP                   ${TOOLCHAIN_PREFIX}objdump)
-set(CMAKE_SIZE                      ${TOOLCHAIN_PREFIX}size)
+set(CMAKE_C_COMPILER                ${TOOLCHAIN_PREFIX}gcc.exe)
+set(CMAKE_ASM_COMPILER              ${TOOLCHAIN_PREFIX}gcc.exe)
+set(CMAKE_CXX_COMPILER              ${TOOLCHAIN_PREFIX}g++.exe)
+set(CMAKE_OBJCOPY                   ${TOOLCHAIN_PREFIX}objcopy.exe)
+set(CMAKE_OBJDUMP                   ${TOOLCHAIN_PREFIX}objdump.exe)
+set(CMAKE_SIZE                      ${TOOLCHAIN_PREFIX}size.exe)
 
 set(CMAKE_EXECUTABLE_SUFFIX_ASM     ".elf")
 set(CMAKE_EXECUTABLE_SUFFIX_C       ".elf")
@@ -62,5 +62,5 @@ add_link_options(
     -Wl,--print-memory-usage
     --specs=nano.specs --specs=nosys.specs
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--gc-sections
-    -T ${CMAKE_SOURCE_DIR}/ch32v305_flash.ld
+    # -T ${CMAKE_SOURCE_DIR}/ch32v305_flash.ld
 )

@@ -15,7 +15,7 @@
     "clangd.arguments": [
         "-j=12",
         "--background-index",
-        "--query-driver=riscv-wch-elf-*", //设置交叉编译器路径
+        "--query-driver=C:/APP/xpack-dev-tools/RISC-VEmbeddedGCC12/bin/riscv-wch-elf-*", //设置交叉编译器路径
         "--compile-commands-dir=${workspaceFolder}/build",
         "--all-scopes-completion",
         "--completion-style=detailed",
@@ -23,5 +23,5 @@
         "--clang-tidy",
         "--log=verbose"
     ],
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
 }

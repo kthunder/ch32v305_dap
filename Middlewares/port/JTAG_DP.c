@@ -123,7 +123,6 @@ void cJTAG_Sequence (uint32_t info, const uint8_t *tdi, uint8_t *tdo) {
   if (n == 0U) {
     n = 64U;
   }
-  // printf("cJTAG_Sequence: n = %d\n", n);
 
   // if (info & JTAG_SEQUENCE_TMS) {
   //   PIN_TMS_SET();

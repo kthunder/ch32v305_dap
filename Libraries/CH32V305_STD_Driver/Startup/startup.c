@@ -121,7 +121,7 @@ FUNC_ALIAS(Reset_Handler, _start);
 
 SECTION_DATA(".vector")
 void (*vector[])(void) = {
-    (void*)RISCV_JUMP(0x2158, 0),
+    (void*)RISCV_JAL(0, 0x158),
     0,
     NMI_Handler,       /* NMI */
     HardFault_Handler, /* Hard Fault */

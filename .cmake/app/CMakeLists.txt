@@ -26,7 +26,6 @@ target_include_directories(app INTERFACE
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/core
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/port/ch32/ch32hs
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryRB
-    ${CMAKE_SOURCE_DIR}/Middlewares/DAPHost
     ${CMAKE_SOURCE_DIR}/Middlewares/port
 )
 
@@ -43,7 +42,6 @@ file(GLOB_RECURSE SOURCES
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/core/usbd_core.c
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryUSB/port/ch32/usb_dc_usbhs.c
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/CherryRB/chry_ringbuffer.c
-    ${CMAKE_SOURCE_DIR}/Middlewares/DAPHost/swd_host.c
     ${CMAKE_SOURCE_DIR}/Middlewares/port/*.c
 )
 list(REMOVE_ITEM SOURCES 
@@ -52,6 +50,10 @@ list(REMOVE_ITEM SOURCES
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/DAP.c
     ${CMAKE_SOURCE_DIR}/Middlewares/CherryDAP/DAP/Source/JTAG_DP.c
     # ${CMAKE_SOURCE_DIR}/Middlewares/CherryUSB/port/ch32/usb_dc_usbhs.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/boot/main.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/boot/dfu_with_st_tool_template.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/app/main.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/app/usb2uart.c
 )
 
 target_sources(app INTERFACE

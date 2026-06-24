@@ -89,8 +89,22 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     case ID_DAP_Vendor26: break;
     case ID_DAP_Vendor27: break;
     case ID_DAP_Vendor28: break;
-    case ID_DAP_Vendor29: break;
-    case ID_DAP_Vendor30: break;
+    case ID_DAP_Vendor29: {
+      num += 1U << 16;           // increment request count
+      // extern uint32_t cJtag_vref;
+      // if (((*request) >= 15)|| ((*request) <= 33))
+      // {
+      //   cJtag_vref = (*request)*100;
+      // }
+      *response++ = DAP_OK;
+      num++;
+      break;
+    }
+    case ID_DAP_Vendor30: {
+        BKP->DATAR42 = 0x5AFE;
+        NVIC_SystemReset();
+        break;
+    }
     case ID_DAP_Vendor31: {
         num += 1U << 16;           // increment request count
         if (*request == 1U) {      // when first command data byte is 1
@@ -98,7 +112,6 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     extern uint8_t cJtag_enabled;
             cJtag_enabled = 1;       // enable cJTAG
             cJtag_active(); 
-            // printf("cJtag_active\r\n");
             *response++ = DAP_OK;
             num++;
         }

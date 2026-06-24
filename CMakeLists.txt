@@ -27,6 +27,13 @@ include(".cmake/riscv-none-embed.cmake")
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
+# 彩色诊断输出 - 完整配置
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fdiagnostics-color=always)
+    add_link_options(-fdiagnostics-color=always)
+elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-fcolor-diagnostics)
+endif()
 # Core project settings
 project(${CMAKE_PROJECT_NAME})
 message("Build type: " ${CMAKE_BUILD_TYPE})
@@ -37,46 +44,27 @@ enable_language(C ASM)
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME})
 
-# 彩色诊断输出 - 完整配置
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(-fdiagnostics-color=always)
-    add_link_options(-fdiagnostics-color=always)
-elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
-    add_compile_options(-fcolor-diagnostics)
-endif()
-
-# 设置环境变量
-set(ENV{FORCE_COLOR} "1")
-# add_compile_definitions(STM32F401xC)
+# Common compile definitions
+# add_compile_definitions(APM32F407xx)
+# add_compile_definitions(APM32F40X)
+# add_compile_definitions(USE_DAL_DRIVER)
+# add_compile_definitions(HSE_VALUE=12000000U)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(.cmake/app)
 
-# Link directories setup
-target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined library search paths
-)
-
-# Add sources to executable
+# ==================== Main Application ====================
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
+    ${CMAKE_SOURCE_DIR}/Core/Source/app/main.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/app/usb2uart.c
 )
 
-# Add include paths
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
-)
-
-# Add project symbols (macros)
-target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
-    # STM32F401xC
-    # Add user defined symbols
-)
-
-# Add linked libraries
-target_link_libraries(${CMAKE_PROJECT_NAME}
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE
     app
-    # Add user defined libraries
+)
+
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
+    -T ${CMAKE_SOURCE_DIR}/Core/Source/app/ch32v305_flash.ld
 )
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.hex)
@@ -85,11 +73,41 @@ set(DIS_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.dis)
 set(LST_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}.lst)
 
 add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${BIN_FILE}
-        COMMAND ${CMAKE_OBJDUMP} -d $<TARGET_FILE:${CMAKE_PROJECT_NAME}> > ${DIS_FILE}
-        COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble $<TARGET_FILE:${PROJECT_NAME}> > ${LST_FILE}
-        # COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble $<TARGET_FILE:${CMAKE_PROJECT_NAME}.elf> > ${LST_FILE}
-        COMMAND ${CMAKE_SIZE} --format=berkeley $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
-        COMMENT "Building completed"
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${HEX_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${BIN_FILE}
+    COMMAND ${CMAKE_OBJDUMP} -d $<TARGET_FILE:${CMAKE_PROJECT_NAME}> > ${DIS_FILE}
+    COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble $<TARGET_FILE:${CMAKE_PROJECT_NAME}> > ${LST_FILE}
+    COMMAND ${CMAKE_SIZE} --format=berkeley $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    COMMENT "Building application completed"
+)
+
+# ==================== Boot Firmware ====================
+add_executable(${CMAKE_PROJECT_NAME}_boot
+    ${CMAKE_SOURCE_DIR}/Core/Source/boot/main.c
+    ${CMAKE_SOURCE_DIR}/Core/Source/boot/dfu_with_st_tool_template.c
+)
+set_target_properties(${CMAKE_PROJECT_NAME}_boot PROPERTIES SUFFIX ".elf")
+
+target_link_options(${CMAKE_PROJECT_NAME}_boot PRIVATE
+    -T ${CMAKE_SOURCE_DIR}/Core/Source/boot/ch32v305_flash.ld
+)
+
+target_compile_definitions(${CMAKE_PROJECT_NAME}_boot PRIVATE BOOT_FW)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}_boot PRIVATE
+    app
+)
+
+set(BOOT_HEX_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_boot.hex)
+set(BOOT_BIN_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_boot.bin)
+set(BOOT_DIS_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_boot.dis)
+set(BOOT_LST_FILE ${PROJECT_BINARY_DIR}/${CMAKE_PROJECT_NAME}_boot.lst)
+
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME}_boot POST_BUILD
+    COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}_boot> ${BOOT_HEX_FILE}
+    COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${CMAKE_PROJECT_NAME}_boot> ${BOOT_BIN_FILE}
+    COMMAND ${CMAKE_OBJDUMP} -d $<TARGET_FILE:${CMAKE_PROJECT_NAME}_boot> > ${BOOT_DIS_FILE}
+    COMMAND ${CMAKE_OBJDUMP} --all-headers --demangle --disassemble $<TARGET_FILE:${CMAKE_PROJECT_NAME}_boot> > ${BOOT_LST_FILE}
+    COMMAND ${CMAKE_SIZE} --format=berkeley $<TARGET_FILE:${CMAKE_PROJECT_NAME}_boot>
+    COMMENT "Building boot firmware completed"
 )

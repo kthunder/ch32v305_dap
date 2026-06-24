@@ -128,16 +128,16 @@ uint16_t uart3_get_rx_data_count(void)
 }
 // USART3中断处理函数 - 处理空闲中断
 void USART3_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-// void USART3_IRQHandler(void)
-// {
-//     if (USART_GetITStatus(USART3, USART_IT_IDLE) != RESET) {
-//         // 清除空闲中断标志
-//         USART_ReceiveData(USART3);
+void USART3_IRQHandler(void)
+{
+    if (USART_GetITStatus(USART3, USART_IT_IDLE) != RESET) {
+        // 清除空闲中断标志
+        USART_ReceiveData(USART3);
 
-//         // 处理接收到的数据
-//         uart3_process_rx_data();
-//     }
-// }
+        // 处理接收到的数据
+        uart3_process_rx_data();
+    }
+}
 // DMA发送函数
 void uart3_dma_send(uint8_t *data, uint16_t len)
 {
@@ -164,23 +164,23 @@ void uart3_dma_send(uint8_t *data, uint16_t len)
 }
 // DMA中断处理函数
 void DMA1_Channel2_IRQHandler(void) __attribute__((interrupt("WCH-Interrupt-fast")));
-// void DMA1_Channel2_IRQHandler(void)
-// {
-//     if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
-//         // 清除中断标志
-//         DMA_ClearITPendingBit(DMA1_IT_TC2);
+void DMA1_Channel2_IRQHandler(void)
+{
+    if (DMA_GetITStatus(DMA1_IT_TC2) != RESET) {
+        // 清除中断标志
+        DMA_ClearITPendingBit(DMA1_IT_TC2);
 
-//         // 禁用USART3的DMA发送请求
-//         USART_DMACmd(USART3, USART_DMAReq_Tx, DISABLE);
+        // 禁用USART3的DMA发送请求
+        USART_DMACmd(USART3, USART_DMAReq_Tx, DISABLE);
 
-//         // 清除忙标志
-//         uart3_dma_tx_busy = 0;
+        // 清除忙标志
+        uart3_dma_tx_busy = 0;
 
-//         chry_dap_usb2uart_uart_send_complete(dma_tx_length);
+        chry_dap_usb2uart_uart_send_complete(dma_tx_length);
 
-//         // printf("UART3 DMA TX complete!\r\n");
-//     }
-// }
+        // printf("UART3 DMA TX complete!\r\n");
+    }
+}
 
 void uartx_preinit(void)
 {

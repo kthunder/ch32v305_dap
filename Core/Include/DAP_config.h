@@ -619,7 +619,6 @@ __STATIC_FORCEINLINE void     PIN_nRESET_OUT (uint32_t bit) {
     {
       // FIX
         iGPIO_CLR(PORT_nRESET, PIN_nRESET);
-        swd_set_target_reset(0);
     }
 }
 

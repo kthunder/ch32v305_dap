@@ -1,8 +1,10 @@
 CompileFlags:
   Add:
-    - --target=riscv32-unknown-elf
-    - -IC:/APP/MounRiver/MounRiver_Studio2/resources/app/resources/win32/components/WCH/Toolchain/RISC-V Embedded GCC12/riscv-wch-elf/include
-    - -I/Users/konglei/git/RISC-V-Embedded-GCC12/riscv-wch-elf/include
-  Remove: 
-  - -march=rv32imacxw
-  - -mabi=ilp32
+    - -IC:/APP/xpack-dev-tools/RISC-VEmbeddedGCC12/riscv-wch-elf/include
+    - -D__GNUC__=12
+  Remove:
+    - -march=rv32imacxw
+    - -msave-restore
+    - -mabi=
+    - -G
+    - -fdiagnostics-color=always
