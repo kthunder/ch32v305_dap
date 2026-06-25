@@ -519,8 +519,22 @@ const struct usb_descriptor cmsisdap_descriptor = {
     .webusb_url_descriptor = &webusb_url_desc
 };
 
+void uid_to_string(char *str)
+{
+    char hex[] = "0123456789ABCDEF";
+    uint8_t *uid = (uint8_t *)0x1FFFF7E8;
+
+    for (int i = 0; i < 12; i++) {
+        str[i * 2]     = hex[(uid[i] >> 4) & 0xF];
+        str[i * 2 + 1] = hex[uid[i] & 0xF];
+    }
+
+    str[24] = '\0';
+}
+
 void chry_dap_init(uint8_t busid, uint32_t reg_base)
 {
+    uid_to_string(serial_number_dynamic);
     chry_ringbuffer_init(&g_uartrx, uartrx_ringbuffer, CONFIG_UARTRX_RINGBUF_SIZE);
     chry_ringbuffer_init(&g_usbrx, usbrx_ringbuffer, CONFIG_USBRX_RINGBUF_SIZE);
 
